@@ -1,55 +1,55 @@
 --- ../src-base/minecraft/net/minecraft/entity/ai/EntityAISkeletonRiders.java
 +++ ../src-work/minecraft/net/minecraft/entity/ai/EntityAISkeletonRiders.java
-@@ -12,6 +12,8 @@
- import net.minecraft.util.math.BlockPos;
- import net.minecraft.world.DifficultyInstance;
- 
-+import javax.annotation.Nullable;
-+
+@@ -15,6 +15,8 @@
  public class EntityAISkeletonRiders extends EntityAIBase
  {
      private final EntitySkeletonHorse horse;
-@@ -34,17 +36,19 @@
++    
++    private boolean eventCancelled;
+ 
+     public EntityAISkeletonRiders(EntitySkeletonHorse horseIn)
+     {
+@@ -34,12 +36,16 @@
          this.horse.setGrowingAge(0);
          this.horse.world.addWeatherEffect(new EntityLightningBolt(this.horse.world, this.horse.posX, this.horse.posY, this.horse.posZ, true));
          EntitySkeleton entityskeleton = this.createSkeleton(difficultyinstance, this.horse);
 -        entityskeleton.startRiding(this.horse);
-+        if (entityskeleton != null) entityskeleton.startRiding(this.horse);
++        if (!eventCancelled) entityskeleton.startRiding(this.horse); //Lava-test TODO should be rerouted by inverted condition to the loop below
  
          for (int i = 0; i < 3; ++i)
          {
++            eventCancelled = false;
              AbstractHorse abstracthorse = this.createHorse(difficultyinstance);
-+            if (abstracthorse == null) continue; // CraftBukkit
++            if (eventCancelled) continue; //Lava-test
              EntitySkeleton entityskeleton1 = this.createSkeleton(difficultyinstance, abstracthorse);
--            entityskeleton1.startRiding(abstracthorse);
-+            if (entityskeleton1 != null) entityskeleton1.startRiding(abstracthorse);
++            if (eventCancelled) //Lava-test
++                abstracthorse.addVelocity(this.horse.getRNG().nextGaussian() * 0.5D, 0.0D, this.horse.getRNG().nextGaussian() * 0.5D); //Lava-test - add rest
+             entityskeleton1.startRiding(abstracthorse);
              abstracthorse.addVelocity(this.horse.getRNG().nextGaussian() * 0.5D, 0.0D, this.horse.getRNG().nextGaussian() * 0.5D);
          }
-     }
- 
-+    @Nullable
-     private AbstractHorse createHorse(DifficultyInstance p_188515_1_)
-     {
-         EntitySkeletonHorse entityskeletonhorse = new EntitySkeletonHorse(this.horse.world);
-@@ -54,10 +58,11 @@
+@@ -54,7 +60,11 @@
          entityskeletonhorse.enablePersistence();
          entityskeletonhorse.setHorseTamed(true);
          entityskeletonhorse.setGrowingAge(0);
 -        entityskeletonhorse.world.spawnEntity(entityskeletonhorse);
-+        if (!entityskeletonhorse.world.spawnEntity(entityskeletonhorse, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.TRAP)) return null; // CraftBukkit
++        //Lava-test start - alter a bit to preserve a bit more of original code
++        //entityskeletonhorse.world.spawnEntity(entityskeletonhorse);
++        if (!entityskeletonhorse.world.spawnEntity(entityskeletonhorse, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.TRAP))
++            eventCancelled = true;
++        //Lava-test end
          return entityskeletonhorse;
      }
  
-+    @Nullable
-     private EntitySkeleton createSkeleton(DifficultyInstance p_188514_1_, AbstractHorse p_188514_2_)
-     {
-         EntitySkeleton entityskeleton = new EntitySkeleton(p_188514_2_.world);
-@@ -73,7 +78,7 @@
+@@ -73,7 +83,11 @@
  
          entityskeleton.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, EnchantmentHelper.addRandomEnchantment(entityskeleton.getRNG(), entityskeleton.getHeldItemMainhand(), (int)(5.0F + p_188514_1_.getClampedAdditionalDifficulty() * (float)entityskeleton.getRNG().nextInt(18)), false));
          entityskeleton.setItemStackToSlot(EntityEquipmentSlot.HEAD, EnchantmentHelper.addRandomEnchantment(entityskeleton.getRNG(), entityskeleton.getItemStackFromSlot(EntityEquipmentSlot.HEAD), (int)(5.0F + p_188514_1_.getClampedAdditionalDifficulty() * (float)entityskeleton.getRNG().nextInt(18)), false));
 -        entityskeleton.world.spawnEntity(entityskeleton);
-+        if (!entityskeleton.world.spawnEntity(entityskeleton, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.JOCKEY)) return null; // CraftBukkit
++        //Lava-test start - same as above
++        //entityskeleton.world.spawnEntity(entityskeleton);
++        if (!entityskeleton.world.spawnEntity(entityskeleton, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.JOCKEY))
++            eventCancelled = true;
++        //Lava-test end
          return entityskeleton;
      }
  }

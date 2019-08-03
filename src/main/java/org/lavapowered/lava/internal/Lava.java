@@ -17,21 +17,4 @@ public class Lava {
     public static String getNmsPrefix() {
         return NMS_PREFIX;
     }
-
-    /*
-     * The unsafe
-     */
-    public final static sun.misc.Unsafe UNSAFE = getUnsafe();
-
-    private static sun.misc.Unsafe getUnsafe() {
-        try {
-            Field theUnsafe = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafe.setAccessible(true);
-            return (sun.misc.Unsafe) theUnsafe.get(null);
-        } catch (Throwable t) {
-            t.printStackTrace();
-            return null;
-        }
-    }
-
 }

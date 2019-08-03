@@ -1,61 +1,45 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockPistonBase.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockPistonBase.java
-@@ -1,6 +1,9 @@
- package net.minecraft.block;
- 
-+import com.google.common.collect.ImmutableList;
- import com.google.common.collect.Lists;
-+
-+import java.util.AbstractList;
- import java.util.List;
- import javax.annotation.Nullable;
- import net.minecraft.block.material.EnumPushReaction;
-@@ -28,6 +31,9 @@
- import net.minecraft.util.math.BlockPos;
- import net.minecraft.world.IBlockAccess;
- import net.minecraft.world.World;
-+import org.bukkit.craftbukkit.block.CraftBlock;
-+import org.bukkit.event.block.BlockPistonExtendEvent;
-+import org.bukkit.event.block.BlockPistonRetractEvent;
- 
- public class BlockPistonBase extends BlockDirectional
- {
-@@ -142,6 +148,15 @@
+@@ -142,6 +142,17 @@
          }
          else if (!flag && ((Boolean)state.getValue(EXTENDED)).booleanValue())
          {
++        	//Craftbukkit start - event
 +            if (!this.isSticky) {
 +                org.bukkit.block.Block block = worldIn.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ());
-+                BlockPistonRetractEvent event = new BlockPistonRetractEvent(block, ImmutableList.<org.bukkit.block.Block>of(), CraftBlock.notchToBlockFace(enumfacing));
++                org.bukkit.event.block.BlockPistonRetractEvent event = new org.bukkit.event.block.BlockPistonRetractEvent(block, com.google.common.collect.ImmutableList.<org.bukkit.block.Block>of(), org.bukkit.craftbukkit.block.CraftBlock.notchToBlockFace(enumfacing));
 +                worldIn.getServer().getPluginManager().callEvent(event);
 +
 +                if (event.isCancelled()) {
 +                    return;
 +                }
 +            }
++            //Craftbukkit end
              worldIn.addBlockEvent(pos, this, 1, enumfacing.getIndex());
          }
      }
-@@ -241,7 +256,8 @@
+@@ -241,7 +252,10 @@
                      }
                  }
  
--                if (!flag1 && !iblockstate.getBlock().isAir(iblockstate, worldIn, blockpos) && canPush(iblockstate, worldIn, blockpos, enumfacing.getOpposite(), false, enumfacing) && (iblockstate.getMobilityFlag() == EnumPushReaction.NORMAL || block == Blocks.PISTON || block == Blocks.STICKY_PISTON))
 +                // CraftBukkit - remove '!iblockstate.getBlock().isAir(iblockstate, worldIn, blockpos)' condition
-+                if (!flag1 && canPush(iblockstate, worldIn, blockpos, enumfacing.getOpposite(), false, enumfacing) && (iblockstate.getMobilityFlag() == EnumPushReaction.NORMAL || block == Blocks.PISTON || block == Blocks.STICKY_PISTON))
++                //Lava-test - revert TODO investigation why is this change here
+                 if (!flag1 && !iblockstate.getBlock().isAir(iblockstate, worldIn, blockpos) && canPush(iblockstate, worldIn, blockpos, enumfacing.getOpposite(), false, enumfacing) && (iblockstate.getMobilityFlag() == EnumPushReaction.NORMAL || block == Blocks.PISTON || block == Blocks.STICKY_PISTON))
++              //if (!flag1 &&                                                                  canPush(iblockstate, worldIn, blockpos, enumfacing.getOpposite(), false, enumfacing) && (iblockstate.getMobilityFlag() == EnumPushReaction.NORMAL || block == Blocks.PISTON || block == Blocks.STICKY_PISTON))
                  {
                      this.doMove(worldIn, pos, enumfacing, false);
                  }
-@@ -349,6 +365,47 @@
+@@ -349,6 +363,49 @@
              IBlockState[] aiblockstate = new IBlockState[k];
              EnumFacing enumfacing = extending ? direction : direction.getOpposite();
  
++            //Craftbukkit start - event
 +            final org.bukkit.block.Block bblock = worldIn.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ());
 +
 +            final List<BlockPos> moved = blockpistonstructurehelper.getBlocksToMove();
 +            final List<BlockPos> broken = blockpistonstructurehelper.getBlocksToDestroy();
 +
-+            List<org.bukkit.block.Block> blocks = new AbstractList<org.bukkit.block.Block>() {
++            List<org.bukkit.block.Block> blocks = new java.util.AbstractList<org.bukkit.block.Block>() {
 +
 +                @Override
 +                public int size() {
@@ -73,9 +57,9 @@
 +            };
 +            org.bukkit.event.block.BlockPistonEvent event;
 +            if (extending) {
-+                event = new BlockPistonExtendEvent(bblock, blocks, CraftBlock.notchToBlockFace(enumfacing));
++                event = new org.bukkit.event.block.BlockPistonExtendEvent(bblock, blocks, org.bukkit.craftbukkit.block.CraftBlock.notchToBlockFace(enumfacing));
 +            } else {
-+                event = new BlockPistonRetractEvent(bblock, blocks, CraftBlock.notchToBlockFace(enumfacing));
++                event = new org.bukkit.event.block.BlockPistonRetractEvent(bblock, blocks, org.bukkit.craftbukkit.block.CraftBlock.notchToBlockFace(enumfacing));
 +            }
 +            worldIn.getServer().getPluginManager().callEvent(event);
 +
@@ -90,6 +74,7 @@
 +                }
 +                return false;
 +            }
++            //Craftbukkit end
 +
              for (int j = list2.size() - 1; j >= 0; --j)
              {

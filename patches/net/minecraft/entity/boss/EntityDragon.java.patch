@@ -1,49 +1,31 @@
 --- ../src-base/minecraft/net/minecraft/entity/boss/EntityDragon.java
 +++ ../src-work/minecraft/net/minecraft/entity/boss/EntityDragon.java
-@@ -40,6 +40,7 @@
- import net.minecraft.util.math.BlockPos;
- import net.minecraft.util.math.MathHelper;
- import net.minecraft.util.math.Vec3d;
-+import net.minecraft.world.Explosion;
- import net.minecraft.world.World;
- import net.minecraft.world.WorldProviderEnd;
- import net.minecraft.world.end.DragonFightManager;
-@@ -49,6 +50,9 @@
- import net.minecraftforge.fml.relauncher.SideOnly;
- import org.apache.logging.log4j.LogManager;
- import org.apache.logging.log4j.Logger;
-+import org.bukkit.entity.ExperienceOrb;
-+import org.bukkit.event.entity.EntityExplodeEvent;
-+import org.bukkit.event.entity.EntityRegainHealthEvent;
- 
- public class EntityDragon extends EntityLiving implements IEntityMultiPart, IMob
- {
-@@ -78,6 +82,8 @@
+@@ -78,6 +78,8 @@
      private final int[] neighbors = new int[24];
      private final PathHeap pathFindQueue = new PathHeap();
  
-+    private Explosion explosionSource = new Explosion(null, this, Double.NaN, Double.NaN, Double.NaN, Float.NaN, true, true); // CraftBukkit - reusable source for CraftTNTPrimed.getSource()
++    private net.minecraft.world.Explosion explosionSource = new net.minecraft.world.Explosion(null, this, Double.NaN, Double.NaN, Double.NaN, Float.NaN, true, true); // CraftBukkit - reusable source for CraftTNTPrimed.getSource()
 +
      public EntityDragon(World worldIn)
      {
          super(worldIn);
-@@ -241,7 +247,7 @@
+@@ -241,7 +243,7 @@
  
                      Vec3d vec3d = iphase.getTargetLocation();
  
 -                    if (vec3d != null)
-+                    if (vec3d != null && iphase.getType() != PhaseList.HOVER) // CraftBukkit - Don't move when hovering
++                    if (vec3d != null && iphase.getType() != PhaseList.HOVER) // CraftBukkit - Don't move when hovering TODO ???
                      {
                          double d6 = vec3d.x - this.posX;
                          double d7 = vec3d.y - this.posY;
-@@ -411,7 +417,15 @@
+@@ -411,7 +413,15 @@
              }
              else if (this.ticksExisted % 10 == 0 && this.getHealth() < this.getMaxHealth())
              {
 -                this.setHealth(this.getHealth() + 1.0F);
++               // CraftBukkit start
 +//                this.setHealth(this.getHealth() + 1.0F);
-+                // CraftBukkit start
-+                EntityRegainHealthEvent event = new EntityRegainHealthEvent(this.getBukkitEntity(), 1.0F, EntityRegainHealthEvent.RegainReason.ENDER_CRYSTAL);
++                org.bukkit.event.entity.EntityRegainHealthEvent event = new org.bukkit.event.entity.EntityRegainHealthEvent(this.getBukkitEntity(), 1.0F, org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason.ENDER_CRYSTAL);
 +                this.world.getServer().getPluginManager().callEvent(event);
 +
 +                if (!event.isCancelled()) {
@@ -53,7 +35,7 @@
              }
          }
  
-@@ -489,6 +503,11 @@
+@@ -489,6 +499,11 @@
          boolean flag = false;
          boolean flag1 = false;
  
@@ -65,7 +47,7 @@
          for (int k1 = i; k1 <= l; ++k1)
          {
              for (int l1 = j; l1 <= i1; ++l1)
-@@ -509,7 +528,11 @@
+@@ -509,7 +524,11 @@
                          {
                              if (block != Blocks.COMMAND_BLOCK && block != Blocks.REPEATING_COMMAND_BLOCK && block != Blocks.CHAIN_COMMAND_BLOCK && block != Blocks.IRON_BARS && block != Blocks.END_GATEWAY)
                              {
@@ -78,13 +60,13 @@
                              }
                              else
                              {
-@@ -525,6 +548,41 @@
+@@ -525,6 +544,41 @@
              }
          }
  
 +        // CraftBukkit start - Set off an EntityExplodeEvent for the dragon exploding all these blocks
 +        org.bukkit.entity.Entity bukkitEntity = this.getBukkitEntity();
-+        EntityExplodeEvent event = new EntityExplodeEvent(bukkitEntity, bukkitEntity.getLocation(), destroyedBlocks, 0F);
++        org.bukkit.event.entity.EntityExplodeEvent event = new org.bukkit.event.entity.EntityExplodeEvent(bukkitEntity, bukkitEntity.getLocation(), destroyedBlocks, 0F);
 +        bukkitEntity.getServer().getPluginManager().callEvent(event);
 +        if (event.isCancelled()) {
 +            // This flag literally means 'Dragon hit something hard' (Obsidian, White Stone or Bedrock) and will cause the dragon to slow down.
@@ -120,12 +102,15 @@
          if (flag1)
          {
              double d0 = p_70972_1_.minX + (p_70972_1_.maxX - p_70972_1_.minX) * (double)this.rand.nextFloat();
-@@ -668,7 +726,7 @@
+@@ -668,7 +722,10 @@
          {
              int i = EntityXPOrb.getXPSplit(p_184668_1_);
              p_184668_1_ -= i;
 -            this.world.spawnEntity(new EntityXPOrb(this.world, this.posX, this.posY, this.posZ, i));
-+            this.world.spawnEntity(new EntityXPOrb(this.world, this.posX, this.posY, this.posZ, i, ExperienceOrb.SpawnReason.ENTITY_DEATH, null));
++            //Craftbukkit start - add SpawnReason
++            //this.world.spawnEntity(new EntityXPOrb(this.world, this.posX, this.posY, this.posZ, i));
++            this.world.spawnEntity(new EntityXPOrb(this.world, this.posX, this.posY, this.posZ, i, org.bukkit.entity.ExperienceOrb.SpawnReason.ENTITY_DEATH, null));
++            //Craftbukkit end
          }
      }
  

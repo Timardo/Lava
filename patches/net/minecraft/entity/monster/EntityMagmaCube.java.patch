@@ -5,7 +5,7 @@
      }
  
 -    protected void setSlimeSize(int size, boolean resetHealth)
-+    public void setSlimeSize(int size, boolean resetHealth)
++    public void setSlimeSize(int size, boolean resetHealth) //Craftbukkit private -> public
      {
          super.setSlimeSize(size, resetHealth);
          this.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue((double)(size * 3));

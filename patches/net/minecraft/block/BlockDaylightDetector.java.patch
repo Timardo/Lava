@@ -4,7 +4,7 @@
  
              if (((Integer)iblockstate.getValue(POWER)).intValue() != i)
              {
-+                i = org.bukkit.craftbukkit.event.CraftEventFactory.callRedstoneChange(worldIn, pos.getX(), pos.getY(), pos.getZ(), iblockstate.getValue(POWER), i).getNewCurrent();
++                i = org.bukkit.craftbukkit.event.CraftEventFactory.callRedstoneChange(worldIn, pos.getX(), pos.getY(), pos.getZ(), iblockstate.getValue(POWER), i).getNewCurrent(); //Craftbukkit - event
                  worldIn.setBlockState(pos, iblockstate.withProperty(POWER, Integer.valueOf(i)), 3);
              }
          }

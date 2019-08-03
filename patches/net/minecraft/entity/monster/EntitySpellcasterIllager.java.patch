@@ -5,7 +5,7 @@
      }
  
 -    protected EntitySpellcasterIllager.SpellType getSpellType()
-+    public SpellType getSpellType()
++    public SpellType getSpellType() //Craftbukkit - protected -> public
      {
          return !this.world.isRemote ? this.activeSpell : EntitySpellcasterIllager.SpellType.getFromId(((Byte)this.dataManager.get(SPELL)).byteValue());
      }

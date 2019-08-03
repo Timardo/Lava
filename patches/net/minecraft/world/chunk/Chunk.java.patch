@@ -1437,37 +1437,7 @@
                  return false;
              }
          }
-@@ -1124,23 +1078,17 @@
-         return true;
-     }
- 
--    public void setStorageArrays(ExtendedBlockStorage[] newStorageArrays)
--    {
--        if (this.storageArrays.length != newStorageArrays.length)
--        {
-+    public void setStorageArrays(ExtendedBlockStorage[] newStorageArrays) {
-+        if (this.storageArrays.length != newStorageArrays.length) {
-             LOGGER.warn("Could not set level chunk sections, array length is {} instead of {}", Integer.valueOf(newStorageArrays.length), Integer.valueOf(this.storageArrays.length));
-+        } else {
-+            System.arraycopy((Object) newStorageArrays, 0, (Object) this.storageArrays, 0, this.storageArrays.length);
-         }
--        else
--        {
--            System.arraycopy((Object)newStorageArrays, 0, (Object)this.storageArrays, 0, this.storageArrays.length);
--        }
-     }
- 
-     @SideOnly(Side.CLIENT)
--    public void read(PacketBuffer buf, int availableSections, boolean groundUpContinuous)
--    {
--        for(TileEntity tileEntity : tileEntities.values())
--        {
-+    public void read(PacketBuffer buf, int availableSections, boolean groundUpContinuous) {
-+        for (TileEntity tileEntity : tileEntities.values()) {
-             tileEntity.updateContainingBlockInfo();
-             tileEntity.getBlockMetadata();
-             tileEntity.getBlockType();
-@@ -1148,21 +1096,15 @@
+@@ -1148,21 +1102,15 @@
  
          boolean flag = this.world.provider.hasSkyLight();
  
@@ -1494,7 +1464,7 @@
                      extendedblockstorage = new ExtendedBlockStorage(i << 4, flag);
                      this.storageArrays[i] = extendedblockstorage;
                  }
-@@ -1170,22 +1112,18 @@
+@@ -1170,22 +1118,18 @@
                  extendedblockstorage.getData().read(buf);
                  buf.readBytes(extendedblockstorage.getBlockLight().getData());
  
@@ -1521,7 +1491,7 @@
                  this.storageArrays[j].recalculateRefCounts();
              }
          }
-@@ -1196,8 +1134,7 @@
+@@ -1196,8 +1140,7 @@
  
          List<TileEntity> invalidList = new java.util.ArrayList<TileEntity>();
  
@@ -1531,7 +1501,7 @@
              if (tileentity.shouldRefresh(this.world, tileentity.getPos(), tileentity.getBlockType().getStateFromMeta(tileentity.getBlockMetadata()), getBlockState(tileentity.getPos())))
                  invalidList.add(tileentity);
              tileentity.updateContainingBlockInfo();
-@@ -1206,55 +1143,43 @@
+@@ -1206,55 +1149,43 @@
          for (TileEntity te : invalidList) te.invalidate();
      }
  
@@ -1599,7 +1569,7 @@
                      return;
                  }
  
-@@ -1263,19 +1188,15 @@
+@@ -1263,19 +1194,15 @@
                  int l = this.queuedLightChecks / 256;
                  ++this.queuedLightChecks;
  
@@ -1623,7 +1593,7 @@
                                  this.world.checkLight(blockpos2);
                              }
                          }
-@@ -1287,126 +1208,93 @@
+@@ -1287,126 +1214,93 @@
          }
      }
  
@@ -1778,7 +1748,7 @@
                  this.world.checkLight(blockpos$mutableblockpos);
              }
          }
-@@ -1414,119 +1302,96 @@
+@@ -1414,119 +1308,96 @@
          return true;
      }
  
@@ -1923,7 +1893,7 @@
                  tileEntities.remove(pos);
              }
          }
-@@ -1534,8 +1399,7 @@
+@@ -1534,8 +1405,7 @@
  
      private static ChunkPos populating = null; // keep track of cascading chunk generation during chunk population
  
@@ -1933,7 +1903,7 @@
          net.minecraftforge.fml.common.ModContainer activeModContainer = net.minecraftforge.fml.common.Loader.instance().activeModContainer();
          String format = "{} loaded a new chunk {} in dimension {} ({}) while populating chunk {}, causing cascading worldgen lag.";
  
-@@ -1549,20 +1413,20 @@
+@@ -1549,20 +1419,20 @@
      }
  
      private final net.minecraftforge.common.capabilities.CapabilityDispatcher capabilities;

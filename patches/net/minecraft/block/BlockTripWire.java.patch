@@ -1,14 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockTripWire.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockTripWire.java
-@@ -25,6 +25,7 @@
- import net.minecraft.world.World;
- import net.minecraftforge.fml.relauncher.Side;
- import net.minecraftforge.fml.relauncher.SideOnly;
-+import org.bukkit.event.entity.EntityInteractEvent;
- 
- public class BlockTripWire extends Block
- {
-@@ -181,6 +182,40 @@
+@@ -181,6 +181,40 @@
              }
          }
  
@@ -27,8 +19,8 @@
 +                    if (object instanceof EntityPlayer) {
 +                        cancellable = org.bukkit.craftbukkit.event.CraftEventFactory.callPlayerInteractEvent((EntityPlayer) object, org.bukkit.event.block.Action.PHYSICAL, pos, null, null, null);
 +                    } else if (object instanceof Entity) {
-+                        cancellable = new EntityInteractEvent(((Entity) object).getBukkitEntity(), block);
-+                        manager.callEvent((EntityInteractEvent) cancellable);
++                        cancellable = new org.bukkit.event.entity.EntityInteractEvent(((Entity) object).getBukkitEntity(), block);
++                        manager.callEvent((org.bukkit.event.entity.EntityInteractEvent) cancellable);
 +                    } else {
 +                        continue;
 +                    }

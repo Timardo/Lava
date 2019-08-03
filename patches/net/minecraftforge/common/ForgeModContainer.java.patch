@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraftforge/common/ForgeModContainer.java
++++ ../src-work/minecraft/net/minecraftforge/common/ForgeModContainer.java
+@@ -496,6 +496,8 @@
+         {
+             ForgeVersion.startVersionCheck();
+         }
++        //Lava-test - register our events TODO: find a bit cleaner way to achive this @Subscribe?
++        org.lavapowered.lava.events.LavaEventFactory.registerEvents();
+     }
+ 
+     @SubscribeEvent

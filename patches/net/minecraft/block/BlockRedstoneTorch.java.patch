@@ -1,62 +1,22 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockRedstoneTorch.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockRedstoneTorch.java
-@@ -20,10 +20,11 @@
- import net.minecraft.world.World;
- import net.minecraftforge.fml.relauncher.Side;
- import net.minecraftforge.fml.relauncher.SideOnly;
-+import org.bukkit.event.block.BlockRedstoneEvent;
- 
- public class BlockRedstoneTorch extends BlockTorch
- {
--    private static final Map<World, List<BlockRedstoneTorch.Toggle>> toggles = new java.util.WeakHashMap<World, List<Toggle>>(); // FORGE - fix vanilla MC-101233
-+    private static final Map<World, List<Toggle>> toggles = new java.util.WeakHashMap<World, List<Toggle>>(); // FORGE - fix vanilla MC-101233
-     private final boolean isOn;
- 
-     private boolean isBurnedOut(World worldIn, BlockPos pos, boolean turnOff)
-@@ -33,18 +34,18 @@
-             toggles.put(worldIn, Lists.newArrayList());
-         }
- 
--        List<BlockRedstoneTorch.Toggle> list = (List)toggles.get(worldIn);
-+        List<Toggle> list = (List)toggles.get(worldIn);
- 
-         if (turnOff)
-         {
--            list.add(new BlockRedstoneTorch.Toggle(pos, worldIn.getTotalWorldTime()));
-+            list.add(new Toggle(pos, worldIn.getTotalWorldTime()));
-         }
- 
-         int i = 0;
- 
-         for (int j = 0; j < list.size(); ++j)
-         {
--            BlockRedstoneTorch.Toggle blockredstonetorch$toggle = list.get(j);
-+            Toggle blockredstonetorch$toggle = list.get(j);
- 
-             if (blockredstonetorch$toggle.pos.equals(pos))
-             {
-@@ -112,17 +113,30 @@
-     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
-     {
-         boolean flag = this.shouldBeOff(worldIn, pos, state);
--        List<BlockRedstoneTorch.Toggle> list = (List)toggles.get(worldIn);
-+        List<Toggle> list = (List)toggles.get(worldIn);
- 
-         while (list != null && !list.isEmpty() && worldIn.getTotalWorldTime() - (list.get(0)).time > 60L)
-         {
+@@ -119,10 +119,27 @@
              list.remove(0);
          }
  
++        //Craftbukkit start - event
 +        org.bukkit.plugin.PluginManager manager = worldIn.getServer().getPluginManager();
 +        org.bukkit.block.Block block = worldIn.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ());
 +        int oldCurrent = this.isOn ? 15 : 0;
 +
-+        BlockRedstoneEvent event = new BlockRedstoneEvent(block, oldCurrent, oldCurrent);
-+
++        org.bukkit.event.block.BlockRedstoneEvent event = new org.bukkit.event.block.BlockRedstoneEvent(block, oldCurrent, oldCurrent);
++        //Craftbukkit end
++        
          if (this.isOn)
          {
              if (flag)
              {
++            	//Craftbukkit start - event
 +                if (oldCurrent != 0) {
 +                    event.setNewCurrent(0);
 +                    manager.callEvent(event);
@@ -64,13 +24,15 @@
 +                        return;
 +                    }
 +                }
++                //Craftbukkit end
                  worldIn.setBlockState(pos, Blocks.UNLIT_REDSTONE_TORCH.getDefaultState().withProperty(FACING, state.getValue(FACING)), 3);
  
                  if (this.isBurnedOut(worldIn, pos, true))
-@@ -143,6 +157,13 @@
+@@ -143,6 +160,15 @@
          }
          else if (!flag && !this.isBurnedOut(worldIn, pos, false))
          {
++        	//Craftbukkit start - event
 +            if (oldCurrent != 15) {
 +                event.setNewCurrent(15);
 +                manager.callEvent(event);
@@ -78,6 +40,7 @@
 +                    return;
 +                }
 +            }
++            //Craftbukkit end
              worldIn.setBlockState(pos, Blocks.REDSTONE_TORCH.getDefaultState().withProperty(FACING, state.getValue(FACING)), 3);
          }
      }

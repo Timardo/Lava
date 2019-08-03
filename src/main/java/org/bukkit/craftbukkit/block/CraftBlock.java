@@ -487,7 +487,7 @@ public class CraftBlock implements Block {
         boolean result = false;
 
         if (block != null && block != Blocks.AIR) {
-            block.dropBlockAsItemWithChance(chunk.getHandle().getWorld(), new BlockPos(x, y, z), block.getDefaultState(), 1.0F, 0);
+            block.dropBlockAsItemWithChance(chunk.getHandle().getWorld(), new BlockPos(x, y, z), block.getStateFromMeta(data), 1.0F, 0);
             result = true;
         }
 

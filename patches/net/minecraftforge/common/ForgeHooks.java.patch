@@ -1,0 +1,40 @@
+--- ../src-base/minecraft/net/minecraftforge/common/ForgeHooks.java
++++ ../src-work/minecraft/net/minecraftforge/common/ForgeHooks.java
+@@ -164,6 +164,8 @@
+ 
+ import org.apache.commons.io.FilenameUtils;
+ import org.apache.commons.io.IOUtils;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.lavapowered.lava.events.LavaEventFactory;
+ 
+ public class ForgeHooks
+ {
+@@ -1292,7 +1294,8 @@
+     {
+         BlockEvent ev = new BlockEvent.CropGrowEvent.Pre(worldIn,pos,state);
+         MinecraftForge.EVENT_BUS.post(ev);
+-        return (ev.getResult() == Event.Result.ALLOW || (ev.getResult() == Event.Result.DEFAULT && def));
++        //Lava-test - move grow event here
++        return (ev.getResult() == Event.Result.ALLOW || (ev.getResult() == Event.Result.DEFAULT && def)) ? LavaEventFactory.handleGrowEvent(worldIn, pos, state) : false;
+     }
+ 
+     public static void onCropsGrowPost(World worldIn, BlockPos pos, IBlockState state, IBlockState blockState)
+@@ -1411,6 +1414,8 @@
+ 
+     public static void onAdvancement(EntityPlayerMP player, Advancement advancement)
+     {
++    	//Lava-test - add bukkit event here
++    	player.world.getServer().getPluginManager().callEvent(new org.bukkit.event.player.PlayerAdvancementDoneEvent(player.getBukkitEntity(), advancement.bukkit));
+         MinecraftForge.EVENT_BUS.post(new AdvancementEvent(player, advancement));
+     }
+ 
+@@ -1470,7 +1475,8 @@
+         {
+             BlockEvent.FarmlandTrampleEvent event = new BlockEvent.FarmlandTrampleEvent(world, pos, state, fallDistance, entity);
+             MinecraftForge.EVENT_BUS.post(event);
+-            return !event.isCanceled();
++            //Lava-test - move Farmland Trample event here
++            return !event.isCanceled() ? LavaEventFactory.onFarmlandTrample(world, pos, state, fallDistance, entity) : false;
+         }
+         return false;
+     }

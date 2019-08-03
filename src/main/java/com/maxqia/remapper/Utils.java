@@ -30,22 +30,29 @@ public class Utils {
 
         Map<String, String> map = Transformer.jarMapping.methods;
         for (String value : map.keySet()) {
-            String[] str = value.split("\\s+");
-            int i = 0;
-            for (Type type : Type.getArgumentTypes(str[1])) {
-                if (i >= parameterTypes.length || !type.getClassName().equals(reverseMapExternal(parameterTypes[i]))) {
-                    i = -1;
-                    break;
+        	boolean failed = false;
+        	if (value.startsWith(match)) {
+                String params = value.split("\\s+")[1];
+                Type[] types = Type.getArgumentTypes(params);
+                
+                if (types.length != parameterTypes.length) { //skip entry if number of params doesn't match - a bit more effective
+                	continue;
                 }
-                i++;
+                
+                for (int i = 0; i < types.length; i++) {
+                    if (!types[i].getClassName().replace('$', '.').replace('/', '.').equals(reverseMapExternal(parameterTypes[i]))) { //add replace to avoid problems with subclasses and $ char
+                    	failed = true;
+                        break;
+                    }
+                }
             }
 
-            if (i >= parameterTypes.length) {
+        	if (!failed) {
                 return map.get(value);
             }
         }
 
-        Class interfaces = inst.getSuperclass();
+        Class<?> interfaces = inst.getSuperclass();
         if (interfaces != null) {
             String superMethodName = mapMethodInternal(interfaces, name, parameterTypes);
             return String.valueOf(superMethodName);

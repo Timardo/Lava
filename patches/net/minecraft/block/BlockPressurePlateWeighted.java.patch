@@ -1,18 +1,11 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockPressurePlateWeighted.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockPressurePlateWeighted.java
-@@ -13,6 +13,7 @@
- import net.minecraft.util.math.BlockPos;
- import net.minecraft.util.math.MathHelper;
- import net.minecraft.world.World;
-+import org.bukkit.event.entity.EntityInteractEvent;
- 
- public class BlockPressurePlateWeighted extends BlockBasePressurePlate
- {
-@@ -33,8 +34,30 @@
+@@ -33,8 +33,32 @@
  
      protected int computeRedstoneStrength(World worldIn, BlockPos pos)
      {
 -        int i = Math.min(worldIn.getEntitiesWithinAABB(Entity.class, PRESSURE_AABB.offset(pos)).size(), this.maxWeight);
++    	//Craftbukkit start - call event
 +//        int i = Math.min(worldIn.getEntitiesWithinAABB(Entity.class, PRESSURE_AABB.offset(pos)).size(), this.maxWeight);
 +        int i = 0;
 +        java.util.Iterator iterator = worldIn.getEntitiesWithinAABB(Entity.class, BlockPressurePlateWeighted.PRESSURE_AABB.offset(pos)).iterator();
@@ -25,8 +18,8 @@
 +            if (entity instanceof EntityPlayer) {
 +                cancellable = org.bukkit.craftbukkit.event.CraftEventFactory.callPlayerInteractEvent((EntityPlayer) entity, org.bukkit.event.block.Action.PHYSICAL, pos, null, null, null);
 +            } else {
-+                cancellable = new EntityInteractEvent(entity.getBukkitEntity(), worldIn.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()));
-+                worldIn.getServer().getPluginManager().callEvent((EntityInteractEvent) cancellable);
++                cancellable = new org.bukkit.event.entity.EntityInteractEvent(entity.getBukkitEntity(), worldIn.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()));
++                worldIn.getServer().getPluginManager().callEvent((org.bukkit.event.entity.EntityInteractEvent) cancellable);
 +            }
 +
 +            // We only want to block turning the plate on if all events are cancelled
@@ -36,6 +29,7 @@
 +        }
 +
 +        i = Math.min(i, this.maxWeight);
++        //Craftbukkit end
 +
          if (i > 0)
          {

@@ -9,33 +9,16 @@
      public EntityAnimal(World worldIn)
      {
          super(worldIn);
-@@ -63,6 +65,8 @@
-         }
-     }
- 
-+    /* CraftBukkit start
-+    // Function disabled as it has no special function anymore after setSitting is disabled.
-     public boolean attackEntityFrom(DamageSource source, float amount)
-     {
-         if (this.isEntityInvulnerable(source))
-@@ -75,6 +79,7 @@
-             return super.attackEntityFrom(source, amount);
-         }
-     }
-+     // CraftBukkit end */
- 
-     public float getBlockPathWeight(BlockPos pos)
-     {
-@@ -118,7 +123,7 @@
+@@ -118,7 +120,7 @@
          return 120;
      }
  
 -    protected boolean canDespawn()
-+    public boolean canDespawn()
++    public boolean canDespawn() //Craftbukkit - protected -> public
      {
          return false;
      }
-@@ -172,6 +177,7 @@
+@@ -172,6 +174,7 @@
          if (player != null)
          {
              this.playerInLove = player.getUniqueID();

@@ -1,29 +1,21 @@
 --- ../src-base/minecraft/net/minecraft/entity/boss/dragon/phase/PhaseManager.java
 +++ ../src-work/minecraft/net/minecraft/entity/boss/dragon/phase/PhaseManager.java
-@@ -3,6 +3,8 @@
- import net.minecraft.entity.boss.EntityDragon;
- import org.apache.logging.log4j.LogManager;
- import org.apache.logging.log4j.Logger;
-+import org.bukkit.craftbukkit.entity.CraftEnderDragon;
-+import org.bukkit.event.entity.EnderDragonChangePhaseEvent;
- 
- public class PhaseManager
- {
-@@ -26,6 +28,17 @@
+@@ -26,6 +26,18 @@
                  this.phase.removeAreaEffect();
              }
  
-+            EnderDragonChangePhaseEvent event = new EnderDragonChangePhaseEvent(
-+                    (CraftEnderDragon) this.dragon.getBukkitEntity(),
-+                    (this.phase == null) ? null : CraftEnderDragon.getBukkitPhase(this.phase.getType()),
-+                    CraftEnderDragon.getBukkitPhase(phaseIn)
++            //Craftbukkit start - add event
++            org.bukkit.event.entity.EnderDragonChangePhaseEvent event = new org.bukkit.event.entity.EnderDragonChangePhaseEvent(
++                    (org.bukkit.craftbukkit.entity.CraftEnderDragon) this.dragon.getBukkitEntity(),
++                    (this.phase == null) ? null : org.bukkit.craftbukkit.entity.CraftEnderDragon.getBukkitPhase(this.phase.getType()),
++                    org.bukkit.craftbukkit.entity.CraftEnderDragon.getBukkitPhase(phaseIn)
 +            );
 +            this.dragon.world.getServer().getPluginManager().callEvent(event);
 +            if (event.isCancelled()) {
 +                return;
 +            }
-+            phaseIn = CraftEnderDragon.getMinecraftPhase(event.getNewPhase());
-+
++            phaseIn = org.bukkit.craftbukkit.entity.CraftEnderDragon.getMinecraftPhase(event.getNewPhase());
++            //Craftbukkit end
              this.phase = this.getPhase(phaseIn);
  
              if (!this.dragon.world.isRemote)

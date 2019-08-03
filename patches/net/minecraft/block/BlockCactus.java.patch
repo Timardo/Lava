@@ -1,31 +1,22 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockCactus.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockCactus.java
-@@ -19,6 +19,7 @@
- import net.minecraft.world.World;
- import net.minecraftforge.fml.relauncher.Side;
- import net.minecraftforge.fml.relauncher.SideOnly;
-+import org.bukkit.craftbukkit.event.CraftEventFactory;
- 
- public class BlockCactus extends Block implements net.minecraftforge.common.IPlantable
- {
-@@ -56,8 +57,9 @@
+@@ -58,6 +58,8 @@
                  {
-                 if (j == 15)
-                 {
--                    worldIn.setBlockState(blockpos, this.getDefaultState());
-+                    // worldIn.setBlockState(blockpos, this.getDefaultState());
+                     worldIn.setBlockState(blockpos, this.getDefaultState());
                      IBlockState iblockstate = state.withProperty(AGE, Integer.valueOf(0));
-+                    CraftEventFactory.handleBlockGrowEvent(worldIn, blockpos.getX(), blockpos.getY(), blockpos.getZ(), this, 0);
++                    //Lava-test - move bukkit event to ForgeHook
++                    //org.bukkit.craftbukkit.event.CraftEventFactory.handleBlockGrowEvent(worldIn, blockpos.getX(), blockpos.getY(), blockpos.getZ(), this, 0); //Craftbukkit - event
                      worldIn.setBlockState(pos, iblockstate, 4);
                      iblockstate.neighborChanged(worldIn, blockpos, this, pos);
                  }
-@@ -123,7 +125,9 @@
+@@ -123,7 +125,10 @@
  
      public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn)
      {
-+        CraftEventFactory.blockDamage = worldIn.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ());
++    	//Lava-test - try to not use this field TODO 
++        //org.bukkit.craftbukkit.event.CraftEventFactory.blockDamage = worldIn.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()); //Craftbukkit - used in EntityDamageByBlockEvent event
          entityIn.attackEntityFrom(DamageSource.CACTUS, 1.0F);
-+        CraftEventFactory.blockDamage = null;
++        //org.bukkit.craftbukkit.event.CraftEventFactory.blockDamage = null; //Craftbukkit - used in EntityDamageByBlockEvent event
      }
  
      public IBlockState getStateFromMeta(int meta)

@@ -5,7 +5,7 @@
      }
  
 -    protected void dispense(World worldIn, BlockPos pos)
-+    public void dispense(World worldIn, BlockPos pos)
++    public void dispense(World worldIn, BlockPos pos) //Craftbukkit - protected -> public
      {
          BlockSourceImpl blocksourceimpl = new BlockSourceImpl(worldIn, pos);
          TileEntityDispenser tileentitydispenser = (TileEntityDispenser)blocksourceimpl.getBlockTileEntity();

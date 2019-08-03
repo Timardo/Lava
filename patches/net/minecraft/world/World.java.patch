@@ -162,7 +162,7 @@
 +            return super.add(blockState);
 +        }
 +    };
-+    public List<EntityItem> captureDrops;
++    //public List<EntityItem> captureDrops; Lava-test - don't use this, forge has it's own
 +    public long ticksPerAnimalSpawns, ticksPerMonsterSpawns;
 +    public boolean populating;
 +    private int tickPosition;

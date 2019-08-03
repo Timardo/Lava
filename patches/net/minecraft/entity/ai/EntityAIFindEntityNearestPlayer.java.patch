@@ -1,11 +1,14 @@
 --- ../src-base/minecraft/net/minecraft/entity/ai/EntityAIFindEntityNearestPlayer.java
 +++ ../src-work/minecraft/net/minecraft/entity/ai/EntityAIFindEntityNearestPlayer.java
-@@ -133,7 +133,7 @@
+@@ -133,7 +133,10 @@
  
      public void startExecuting()
      {
 -        this.entityLiving.setAttackTarget(this.entityTarget);
++        //Craftbukkit start - add TargetReason for event
++        //this.entityLiving.setAttackTarget(this.entityTarget);
 +        this.entityLiving.setAttackTarget(this.entityTarget, org.bukkit.event.entity.EntityTargetEvent.TargetReason.CLOSEST_PLAYER, true);
++        //Craftbukkit end
          super.startExecuting();
      }
  

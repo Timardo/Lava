@@ -1,19 +1,23 @@
 --- ../src-base/minecraft/net/minecraft/entity/item/EntityEnderEye.java
 +++ ../src-work/minecraft/net/minecraft/entity/item/EntityEnderEye.java
-@@ -14,11 +14,11 @@
+@@ -14,11 +14,18 @@
  
  public class EntityEnderEye extends Entity
  {
 -    private double targetX;
--    private double targetY;
--    private double targetZ;
--    private int despawnTimer;
++    //Craftbukkit start - private -> public
++    /*private double targetX;
+     private double targetY;
+     private double targetZ;
+     private int despawnTimer;
 -    private boolean shatterOrDrop;
++    private boolean shatterOrDrop;*/
 +    public double targetX;
 +    public double targetY;
 +    public double targetZ;
 +    public int despawnTimer;
 +    public boolean shatterOrDrop;
++    //Craftbukkit end
  
      public EntityEnderEye(World worldIn)
      {

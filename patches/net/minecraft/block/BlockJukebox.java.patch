@@ -5,7 +5,7 @@
      }
  
 -    private void dropRecord(World worldIn, BlockPos pos, IBlockState state)
-+    public void dropRecord(World worldIn, BlockPos pos, IBlockState state)
++    public void dropRecord(World worldIn, BlockPos pos, IBlockState state) //Craftbukkit - private -> public
      {
          if (!worldIn.isRemote)
          {
@@ -13,7 +13,7 @@
  
              public void setRecord(ItemStack recordStack)
              {
-+                // CraftBukkit start - There can only be one
++                // CraftBukkit start - There can only be one /// Lava-test - TODO investigate why is this here
 +                if (!recordStack.isEmpty()) {
 +                    recordStack.setCount(1);
 +                }

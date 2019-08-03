@@ -43,7 +43,7 @@ public class CraftRabbit extends CraftAnimals implements Rabbit {
             World world = ((CraftWorld) this.getWorld()).getHandle();
             entity.tasks = new EntityAITasks(world != null && world.profiler != null ? world.profiler : null);
             entity.targetTasks = new EntityAITasks(world != null && world.profiler != null ? world.profiler : null);
-            entity.initializePathFinderGoals();
+            entity.setMovementSpeed(0.0D);
         }
 
         entity.setRabbitType(CraftMagicMapping.toMagic(type));

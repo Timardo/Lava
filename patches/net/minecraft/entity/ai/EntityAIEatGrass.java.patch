@@ -9,21 +9,29 @@
  
  public class EntityAIEatGrass extends EntityAIBase
  {
-@@ -78,7 +80,7 @@
- 
-             if (IS_TALL_GRASS.apply(this.entityWorld.getBlockState(blockpos)))
+@@ -80,6 +82,12 @@
              {
--                if (net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.entityWorld, this.grassEaterEntity))
-+                if (!CraftEventFactory.callEntityChangeBlockEvent(this.grassEaterEntity, this.grassEaterEntity.world.getWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ()), Material.AIR, !net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.entityWorld, this.grassEaterEntity)).isCancelled())
+                 if (net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.entityWorld, this.grassEaterEntity))
                  {
++                    //Lava-test start - implement event like this to preserve original code block
++                    if (CraftEventFactory.callEntityChangeBlockEvent(this.grassEaterEntity, this.grassEaterEntity.world.getWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ()), Material.AIR, false).isCancelled()) {
++                        this.grassEaterEntity.eatGrassBonus();
++                        return; //skip the destroyBlock call
++                    }
++                    //Lava-test end
                      this.entityWorld.destroyBlock(blockpos, false);
                  }
-@@ -91,7 +93,7 @@
  
-                 if (this.entityWorld.getBlockState(blockpos1).getBlock() == Blocks.GRASS)
+@@ -93,6 +101,12 @@
                  {
--                    if (net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.entityWorld, this.grassEaterEntity))
-+                    if (!CraftEventFactory.callEntityChangeBlockEvent(this.grassEaterEntity, this.grassEaterEntity.world.getWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ()), Material.AIR, !net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.entityWorld, this.grassEaterEntity)).isCancelled())
+                     if (net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.entityWorld, this.grassEaterEntity))
                      {
++                        //Lava-test start - event
++                        if (CraftEventFactory.callEntityChangeBlockEvent(this.grassEaterEntity, this.grassEaterEntity.world.getWorld().getBlockAt(blockpos.getX(), blockpos.getY(), blockpos.getZ()), Material.AIR, false).isCancelled()) {
++                            this.grassEaterEntity.eatGrassBonus();
++                            return;
++                        }
++                        //Lava-test end
                          this.entityWorld.playEvent(2001, blockpos1, Block.getIdFromBlock(Blocks.GRASS));
                          this.entityWorld.setBlockState(blockpos1, Blocks.DIRT.getDefaultState(), 2);
+                     }

@@ -1,32 +1,24 @@
 --- ../src-base/minecraft/net/minecraft/entity/passive/AbstractHorse.java
 +++ ../src-work/minecraft/net/minecraft/entity/passive/AbstractHorse.java
-@@ -56,6 +56,7 @@
- import net.minecraft.world.World;
- import net.minecraftforge.fml.relauncher.Side;
- import net.minecraftforge.fml.relauncher.SideOnly;
-+import org.bukkit.event.entity.EntityRegainHealthEvent;
- 
- public abstract class AbstractHorse extends EntityAnimal implements IInventoryChangedListener, IJumpingMount
- {
-@@ -66,7 +67,7 @@
+@@ -66,7 +66,7 @@
              return p_apply_1_ instanceof AbstractHorse && ((AbstractHorse)p_apply_1_).isBreeding();
          }
      };
 -    protected static final IAttribute JUMP_STRENGTH = (new RangedAttribute((IAttribute)null, "horse.jumpStrength", 0.7D, 0.0D, 2.0D)).setDescription("Jump Strength").setShouldWatch(true);
-+    public static final IAttribute JUMP_STRENGTH = (new RangedAttribute((IAttribute)null, "horse.jumpStrength", 0.7D, 0.0D, 2.0D)).setDescription("Jump Strength").setShouldWatch(true);
++    public static final IAttribute JUMP_STRENGTH = (new RangedAttribute((IAttribute)null, "horse.jumpStrength", 0.7D, 0.0D, 2.0D)).setDescription("Jump Strength").setShouldWatch(true); //Craftbukkit - protected -> public
      private static final DataParameter<Byte> STATUS = EntityDataManager.<Byte>createKey(AbstractHorse.class, DataSerializers.BYTE);
      private static final DataParameter<Optional<UUID>> OWNER_UNIQUE_ID = EntityDataManager.<Optional<UUID>>createKey(AbstractHorse.class, DataSerializers.OPTIONAL_UNIQUE_ID);
      private int eatingCounter;
-@@ -75,7 +76,7 @@
+@@ -75,7 +75,7 @@
      public int tailCounter;
      public int sprintCounter;
      protected boolean horseJumping;
 -    protected ContainerHorseChest horseChest;
-+    public ContainerHorseChest horseChest;
++    public ContainerHorseChest horseChest; //Craftbukkit - protected -> public
      protected int temper;
      protected float jumpPower;
      private boolean allowStandSliding;
-@@ -88,6 +89,8 @@
+@@ -88,6 +88,8 @@
      protected boolean canGallop = true;
      protected int gallopTime;
  
@@ -35,20 +27,23 @@
      public AbstractHorse(World worldIn)
      {
          super(worldIn);
-@@ -288,10 +291,10 @@
+@@ -288,10 +290,13 @@
          return 2;
      }
  
 -    protected void initHorseChest()
-+    public void initHorseChest()
++    public void initHorseChest() //Craftbukkit - protected -> public
      {
          ContainerHorseChest containerhorsechest = this.horseChest;
 -        this.horseChest = new ContainerHorseChest("HorseChest", this.getInventorySize());
++        //Craftbukkit start - add this to constructor
++        //this.horseChest = new ContainerHorseChest("HorseChest", this.getInventorySize());
 +        this.horseChest = new ContainerHorseChest("HorseChest", this.getInventorySize(), this);
++        //Craftbukkit end
          this.horseChest.setCustomName(this.getName());
  
          if (containerhorsechest != null)
-@@ -465,7 +468,7 @@
+@@ -465,7 +470,7 @@
  
      public int getMaxTemper()
      {
@@ -57,61 +52,70 @@
      }
  
      protected float getSoundVolume()
-@@ -545,7 +548,7 @@
+@@ -545,7 +550,10 @@
  
          if (this.getHealth() < this.getMaxHealth() && f > 0.0F)
          {
 -            this.heal(f);
-+            this.heal(f, EntityRegainHealthEvent.RegainReason.EATING);
++            //Craftbukkit start - add regain reason
++            //this.heal(f);
++            this.heal(f, org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason.EATING);
++            //Craftbukkit end
              flag = true;
          }
  
-@@ -609,7 +612,7 @@
+@@ -609,7 +617,7 @@
  
      public void onDeath(DamageSource cause)
      {
 -        super.onDeath(cause);
-+        // super.onDeath(cause); // Moved down
++        // super.onDeath(cause); //Craftbukkit - Moved down
  
          if (!this.world.isRemote && this.horseChest != null)
          {
-@@ -623,6 +626,7 @@
+@@ -623,6 +631,7 @@
                  }
              }
          }
-+        super.onDeath(cause);
++        super.onDeath(cause); //Craftukkit - moved from above
      }
  
      public void onLivingUpdate()
-@@ -638,7 +642,7 @@
+@@ -638,7 +647,10 @@
          {
              if (this.rand.nextInt(900) == 0 && this.deathTime == 0)
              {
 -                this.heal(1.0F);
-+                this.heal(1.0F, EntityRegainHealthEvent.RegainReason.REGEN);
++                //Craftbukkit start - add regain reason
++                //this.heal(1.0F);
++                this.heal(1.0F, org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason.REGEN);
++                //Craftbukkit end
              }
  
              if (this.canEatGrass())
-@@ -941,7 +945,7 @@
+@@ -941,7 +953,8 @@
          {
              compound.setString("OwnerUUID", this.getOwnerUniqueId().toString());
          }
 -
++        
 +        compound.setInteger("Bukkit.MaxDomestication", this.maxDomestication); // CraftBukkit
          if (!this.horseChest.getStackInSlot(0).isEmpty())
          {
              compound.setTag("SaddleItem", this.horseChest.getStackInSlot(0).writeToNBT(new NBTTagCompound()));
-@@ -971,6 +975,9 @@
+@@ -971,6 +984,11 @@
          {
              this.setOwnerUniqueId(UUID.fromString(s));
          }
++        //Craftbukkit start - add maxDomestication
 +        if (compound.hasKey("Bukkit.MaxDomestication")) {
 +            this.maxDomestication = compound.getInteger("Bukkit.MaxDomestication");
 +        }
++        //Craftbukkit end
  
          IAttributeInstance iattributeinstance = this.getAttributeMap().getAttributeInstanceByName("Speed");
  
-@@ -1074,6 +1081,18 @@
+@@ -1074,6 +1092,18 @@
  
      public void handleStartJump(int p_184775_1_)
      {

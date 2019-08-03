@@ -1,23 +1,28 @@
 --- ../src-base/minecraft/net/minecraft/command/ServerCommandManager.java
 +++ ../src-work/minecraft/net/minecraft/command/ServerCommandManager.java
-@@ -40,6 +40,10 @@
+@@ -40,6 +40,12 @@
      public ServerCommandManager(MinecraftServer serverIn)
      {
          this.server = serverIn;
++        //Craftbukkit start - split the constructor to register vanilla commands in bukkit too /// Lava-test TODO - completely rework the Bukkit init to support more original code blocks
 +        CommandBase.setCommandListener(this);
 +    }
 +
 +    public void registerVanillaCommands() {
++        //Craftbukkit end
          this.registerCommand(new CommandTime());
          this.registerCommand(new CommandGameMode());
          this.registerCommand(new CommandDifficulty());
-@@ -89,8 +93,7 @@
+@@ -89,8 +95,10 @@
          this.registerCommand(new CommandLocate());
          this.registerCommand(new CommandReload());
          this.registerCommand(new CommandFunction());
 -
 -        if (serverIn.isDedicatedServer())
++        //Craftbukkit start - pass field instead of local as we don't have it here
++        //if (serverIn.isDedicatedServer())
 +        if (server.isDedicatedServer())
++        //Craftbukkit end
          {
              this.registerCommand(new CommandOp());
              this.registerCommand(new CommandDeOp());

@@ -5,7 +5,7 @@
      }
  
 -    protected boolean canDespawn()
-+    public boolean canDespawn()
++    public boolean canDespawn() //Craftbukkit - protected -> public
      {
          return true;
      }

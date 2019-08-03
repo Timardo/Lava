@@ -13,46 +13,56 @@
  
  public class EntityAIMate extends EntityAIBase
  {
-@@ -106,6 +108,9 @@
+@@ -106,6 +108,11 @@
  
          if (entityageable != null)
          {
++            //Craftbukkit start - ???
 +            if (entityageable instanceof EntityTameable && ((EntityTameable) entityageable).isTamed()) {
 +                entityageable.persistenceRequired = true;
 +            }
++            //Craftbukkit end
              EntityPlayerMP entityplayermp = this.animal.getLoveCause();
  
              if (entityplayermp == null && this.targetMate.getLoveCause() != null)
-@@ -113,6 +118,13 @@
+@@ -113,6 +120,15 @@
                  entityplayermp = this.targetMate.getLoveCause();
              }
  
++            //Craftbukkit start - call event TODO implement this event in forge
 +            int experience = this.animal.getRNG().nextInt(7) + 1;
 +            org.bukkit.event.entity.EntityBreedEvent entityBreedEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callEntityBreedEvent(entityageable, animal, targetMate, entityplayermp, this.animal.breedItem, experience);
 +            if (entityBreedEvent.isCancelled()) {
 +                return;
 +            }
 +            experience = entityBreedEvent.getExperience();
++            //Craftbukkit end
 +
              if (entityplayermp != null)
              {
                  entityplayermp.addStat(StatList.ANIMALS_BRED);
-@@ -125,7 +137,7 @@
+@@ -125,7 +141,10 @@
              this.targetMate.resetInLove();
              entityageable.setGrowingAge(-24000);
              entityageable.setLocationAndAngles(this.animal.posX, this.animal.posY, this.animal.posZ, 0.0F, 0.0F);
 -            this.world.spawnEntity(entityageable);
++            //Craftbukkit start - add SpawnReason
++            //this.world.spawnEntity(entityageable);
 +            this.world.spawnEntity(entityageable, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.BREEDING);
++            //Craftbukkit end
              Random random = this.animal.getRNG();
  
              for (int i = 0; i < 7; ++i)
-@@ -141,7 +153,8 @@
+@@ -141,7 +160,11 @@
  
              if (this.world.getGameRules().getBoolean("doMobLoot"))
              {
 -                this.world.spawnEntity(new EntityXPOrb(this.world, this.animal.posX, this.animal.posY, this.animal.posZ, random.nextInt(7) + 1));
++                //Craftbukkit start - add SpawnReason and event-experience
++                //this.world.spawnEntity(new EntityXPOrb(this.world, this.animal.posX, this.animal.posY, this.animal.posZ, random.nextInt(7) + 1));
 +                if (experience > 0)
-+                    this.world.spawnEntity(new EntityXPOrb(this.world, this.animal.posX, this.animal.posY, this.animal.posZ, experience, ExperienceOrb.SpawnReason.ENTITY_DEATH, null));
++                    this.world.spawnEntity(new EntityXPOrb(this.world, this.animal.posX, this.animal.posY, this.animal.posZ, experience, ExperienceOrb.SpawnReason.BREED, null));
++                //Craftbukkit end
              }
          }
      }

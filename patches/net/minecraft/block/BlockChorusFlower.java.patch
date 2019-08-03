@@ -1,23 +1,16 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockChorusFlower.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockChorusFlower.java
-@@ -23,6 +23,7 @@
- import net.minecraft.world.World;
- import net.minecraftforge.fml.relauncher.Side;
- import net.minecraftforge.fml.relauncher.SideOnly;
-+import org.bukkit.craftbukkit.event.CraftEventFactory;
- 
- public class BlockChorusFlower extends Block
- {
-@@ -106,8 +107,18 @@
+@@ -106,8 +106,20 @@
  
                      if (flag && areAllNeighborsEmpty(worldIn, blockpos, (EnumFacing)null) && worldIn.isAirBlock(pos.up(2)))
                      {
 -                        worldIn.setBlockState(pos, Blocks.CHORUS_PLANT.getDefaultState(), 2);
 -                        this.placeGrownFlower(worldIn, blockpos, i);
++                    	//Craftbukkit start - spread event
 +//                        worldIn.setBlockState(pos, Blocks.CHORUS_PLANT.getDefaultState(), 2);
 +//                        this.placeGrownFlower(worldIn, blockpos, i);
 +                        BlockPos target = blockpos;
-+                        if (CraftEventFactory.handleBlockSpreadEvent(
++                        if (org.bukkit.craftbukkit.event.CraftEventFactory.handleBlockSpreadEvent(
 +                                worldIn.getWorld().getBlockAt(target.getX(), target.getY(), target.getZ()),
 +                                worldIn.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()),
 +                                this,
@@ -26,17 +19,19 @@
 +                            worldIn.setBlockState(pos, Blocks.CHORUS_PLANT.getDefaultState(), 2);
 +                            worldIn.playEvent(1033, pos, 0);
 +                        }
++                        //Craftbukkit end
                      }
                      else if (i < 4)
                      {
-@@ -126,7 +137,17 @@
+@@ -126,7 +138,19 @@
  
                              if (worldIn.isAirBlock(blockpos1) && worldIn.isAirBlock(blockpos1.down()) && areAllNeighborsEmpty(worldIn, blockpos1, enumfacing.getOpposite()))
                              {
 -                                this.placeGrownFlower(worldIn, blockpos1, i + 1);
++                            	//Craftbukkit start - spread event
 +//                                this.placeGrownFlower(worldIn, blockpos1, i + 1);
 +                                BlockPos target = blockpos1;
-+                                if (CraftEventFactory.handleBlockSpreadEvent(
++                                if (org.bukkit.craftbukkit.event.CraftEventFactory.handleBlockSpreadEvent(
 +                                        worldIn.getWorld().getBlockAt(target.getX(), target.getY(), target.getZ()),
 +                                        worldIn.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()),
 +                                        this,
@@ -45,16 +40,18 @@
 +                                    worldIn.playEvent(1033, pos, 0);
 +                                    flag2 = true;
 +                                }
++                               //Craftbukkit end
                                  flag2 = true;
                              }
                          }
-@@ -137,12 +158,32 @@
+@@ -137,12 +161,36 @@
                          }
                          else
                          {
 -                            this.placeDeadFlower(worldIn, pos);
++                        	//Craftbukkit start - grow event
 +//                            this.placeDeadFlower(worldIn, pos);
-+                            if (CraftEventFactory.handleBlockGrowEvent(
++                            if (org.bukkit.craftbukkit.event.CraftEventFactory.handleBlockGrowEvent(
 +                                    worldIn,
 +                                    pos.getX(),
 +                                    pos.getY(),
@@ -64,13 +61,15 @@
 +                            )) {
 +                                worldIn.playEvent(1034, pos, 0);
 +                            }
++                            //Craftbukkit end
                          }
                      }
                      else if (i == 4)
                      {
 -                        this.placeDeadFlower(worldIn, pos);
++                    	//Craftbukkit start - grow event
 +//                        this.placeDeadFlower(worldIn, pos);
-+                        if (CraftEventFactory.handleBlockGrowEvent(
++                        if (org.bukkit.craftbukkit.event.CraftEventFactory.handleBlockGrowEvent(
 +                                worldIn,
 +                                pos.getX(),
 +                                pos.getY(),
@@ -80,6 +79,7 @@
 +                        )) {
 +                            worldIn.playEvent(1034, pos, 0);
 +                        }
++                        //Craftbukkit end
                      }
                      net.minecraftforge.common.ForgeHooks.onCropsGrowPost(worldIn, pos, state, worldIn.getBlockState(pos));
                  }

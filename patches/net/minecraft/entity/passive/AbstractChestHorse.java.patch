@@ -16,8 +16,8 @@
 -            this.setChested(false);
 +            // this.setChested(false); // CraftBukkit - moved down
          }
-+        super.onDeath(cause);
-+        this.setChested(false);
++        super.onDeath(cause); //Craftbukkit - moved from above
++        this.setChested(false); //Craftbukkit - moved from above
      }
  
      public static void registerFixesAbstractChestHorse(DataFixer fixer, Class<?> entityClass)

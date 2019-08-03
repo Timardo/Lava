@@ -240,14 +240,14 @@
                  if (!stack.isEmpty() && stack.getItem().onBlockStartBreak(stack, pos, player)) return false;
  
                  this.world.playEvent(this.player, 2001, pos, Block.getStateId(iblockstate));
-+                world.captureDrops = new ArrayList<>();
++                //world.captureDrops = new ArrayList<>(); TODO
                  boolean flag1 = false;
 +                if (event.isDropItems()) {
-+                    for (EntityItem item : world.captureDrops) {
-+                        world.spawnEntity(item);
-+                    }
++                    //for (EntityItem item : world.captureDrops) {
++                    //    world.spawnEntity(item);
++                    //}
 +                }
-+                world.captureDrops = null;
++                //world.captureDrops = null;
  
                  if (this.isCreative())
                  {

@@ -1,12 +1,14 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockTNT.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockTNT.java
-@@ -115,6 +115,9 @@
+@@ -115,6 +115,11 @@
  
              if (entityarrow.isBurning())
              {
++            	//Craftbukkit start - event
 +                if (org.bukkit.craftbukkit.event.CraftEventFactory.callEntityChangeBlockEvent(entityarrow, pos, Blocks.AIR, 0).isCancelled()) {
 +                    return;
 +                }
++                //Craftbukkit end
                  this.explode(worldIn, pos, worldIn.getBlockState(pos).withProperty(EXPLODE, Boolean.valueOf(true)), entityarrow.shootingEntity instanceof EntityLivingBase ? (EntityLivingBase)entityarrow.shootingEntity : null);
                  worldIn.setBlockToAir(pos);
              }

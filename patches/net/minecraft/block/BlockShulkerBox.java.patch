@@ -5,19 +5,19 @@
  {
      public static final PropertyEnum<EnumFacing> FACING = PropertyDirection.create("facing");
 -    private final EnumDyeColor color;
-+    public final EnumDyeColor color;
++    public final EnumDyeColor color; //Craftbukkit - private -> public
  
      public BlockShulkerBox(EnumDyeColor colorIn)
      {
-@@ -160,9 +160,32 @@
+@@ -160,9 +160,34 @@
          }
      }
  
--    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
--    {
 +    // CraftBukkit start - override to prevent duplication when dropping
-+    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune) {
-+        TileEntity tileentity = worldIn.getTileEntity(pos);
+     public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
+     {
++    	//Lava-test - TODO investigate why is this here..
++        /*TileEntity tileentity = worldIn.getTileEntity(pos);
 +
 +        if (tileentity instanceof TileEntityShulkerBox) {
 +            TileEntityShulkerBox tileentityshulkerbox = (TileEntityShulkerBox) tileentity;
@@ -38,29 +38,26 @@
 +            }
 +
 +            worldIn.updateComparatorOutputLevel(pos, state.getBlock());
-+        }
++        }*/
      }
 +    // CraftBukkit end
  
      public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
      {
-@@ -181,7 +204,7 @@
+@@ -181,7 +206,7 @@
      {
          TileEntity tileentity = worldIn.getTileEntity(pos);
  
 -        if (tileentity instanceof TileEntityShulkerBox)
-+        if (false && tileentity instanceof TileEntityShulkerBox) // CraftBukkit - moved up
++        if (tileentity instanceof TileEntityShulkerBox) // CraftBukkit - moved up /// Lava-test - revert back
          {
              TileEntityShulkerBox tileentityshulkerbox = (TileEntityShulkerBox)tileentity;
  
-@@ -202,8 +225,9 @@
-                 spawnAsEntity(worldIn, pos, itemstack);
-             }
+@@ -204,6 +229,7 @@
  
--            worldIn.updateComparatorOutputLevel(pos, state.getBlock());
-+//            worldIn.updateComparatorOutputLevel(pos, state.getBlock());
+             worldIn.updateComparatorOutputLevel(pos, state.getBlock());
          }
-+        worldIn.updateComparatorOutputLevel(pos, state.getBlock()); // CraftBukkit - moved down
++        //worldIn.updateComparatorOutputLevel(pos, state.getBlock()); // CraftBukkit - moved down /// Lava-test revert back
  
          super.breakBlock(worldIn, pos, state);
      }

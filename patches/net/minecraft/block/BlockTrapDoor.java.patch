@@ -1,17 +1,10 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockTrapDoor.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockTrapDoor.java
-@@ -24,6 +24,7 @@
- import net.minecraft.world.World;
- import net.minecraftforge.fml.relauncher.Side;
- import net.minecraftforge.fml.relauncher.SideOnly;
-+import org.bukkit.event.block.BlockRedstoneEvent;
- 
- public class BlockTrapDoor extends Block
- {
-@@ -130,6 +131,18 @@
+@@ -130,6 +130,20 @@
  
              if (flag || blockIn.getDefaultState().canProvidePower())
              {
++            	//Craftbukkit start - event
 +                org.bukkit.World bworld = worldIn.getWorld();
 +                org.bukkit.block.Block bblock = bworld.getBlockAt(pos.getX(), pos.getY(), pos.getZ());
 +
@@ -19,10 +12,11 @@
 +                int oldPower = state.getValue(OPEN) ? 15 : 0;
 +
 +                if (oldPower == 0 ^ power == 0 || blockIn.getDefaultState().hasComparatorInputOverride()) {
-+                    BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(bblock, oldPower, power);
++                    org.bukkit.event.block.BlockRedstoneEvent eventRedstone = new org.bukkit.event.block.BlockRedstoneEvent(bblock, oldPower, power);
 +                    worldIn.getServer().getPluginManager().callEvent(eventRedstone);
 +                    flag = eventRedstone.getNewCurrent() > 0;
 +                }
++                //Craftbukkit end
 +
                  boolean flag1 = ((Boolean)state.getValue(OPEN)).booleanValue();
  
