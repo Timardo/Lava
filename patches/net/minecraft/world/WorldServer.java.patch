@@ -557,15 +557,19 @@
                  break;
              }
          }
-@@ -346,17 +513,14 @@
+@@ -346,17 +513,18 @@
          this.worldInfo.setSpawnZ(j);
      }
  
 -    protected boolean isChunkLoaded(int x, int z, boolean allowEmpty)
 -    {
-+    public boolean isChunkLoaded(int x, int z, boolean allowEmpty) {
++    protected boolean isChunkLoaded(int x, int z, boolean allowEmpty) {
          return this.getChunkProvider().chunkExists(x, z);
      }
++    
++    public boolean isChunkLoaded_CB(int x, int z, boolean allowEmpty) {
++        return this.isChunkLoaded(x, z, allowEmpty);
++    }
  
 -    protected void playerCheckLight()
 -    {
@@ -578,7 +582,7 @@
              int i = this.rand.nextInt(this.playerEntities.size());
              EntityPlayer entityplayer = this.playerEntities.get(i);
              int j = MathHelper.floor(entityplayer.posX) + this.rand.nextInt(11) - 5;
-@@ -368,28 +532,22 @@
+@@ -368,28 +536,22 @@
          this.profiler.endSection();
      }
  
@@ -613,7 +617,7 @@
                  this.profiler.startSection("getChunk");
                  Chunk chunk = iterator.next();
                  int j = chunk.x * 16;
-@@ -398,70 +556,60 @@
+@@ -398,70 +560,60 @@
                  chunk.enqueueRelightChecks();
                  this.profiler.endStartSection("tickChunk");
                  chunk.onTick(false);
@@ -706,7 +710,7 @@
                                  this.updateLCG = this.updateLCG * 3 + 1013904223;
                                  int j1 = this.updateLCG >> 2;
                                  int k1 = j1 & 15;
-@@ -471,8 +619,7 @@
+@@ -471,8 +623,7 @@
                                  Block block = iblockstate.getBlock();
                                  this.profiler.startSection("randomTick");
  
@@ -716,7 +720,7 @@
                                      block.randomTick(this, new BlockPos(k1 + j, i2 + extendedblockstorage.getYLocation(), l1 + k), iblockstate, this.rand);
                                  }
  
-@@ -487,26 +634,19 @@
+@@ -487,26 +638,19 @@
          }
      }
  
@@ -750,7 +754,7 @@
                  blockpos = blockpos.up(2);
              }
  
-@@ -514,40 +654,32 @@
+@@ -514,40 +658,32 @@
          }
      }
  
@@ -799,7 +803,7 @@
                          iblockstate.getBlock().updateTick(this, pos, iblockstate, this.rand);
                      }
                  }
-@@ -560,52 +692,42 @@
+@@ -560,52 +696,42 @@
  
          NextTickListEntry nextticklistentry = new NextTickListEntry(pos, blockIn);
  
@@ -866,7 +870,7 @@
              this.resetUpdateEntityTick();
          }
  
-@@ -613,20 +735,16 @@
+@@ -613,20 +739,16 @@
          super.updateEntities();
      }
  
@@ -891,7 +895,7 @@
                      continue;
                  }
  
-@@ -635,14 +753,10 @@
+@@ -635,14 +757,10 @@
  
              this.profiler.startSection("tick");
  
@@ -909,7 +913,7 @@
                      CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Ticking player");
                      CrashReportCategory crashreportcategory = crashreport.makeCategory("Player being ticked");
                      entity.addEntityCrashInfo(crashreportcategory);
-@@ -653,13 +767,11 @@
+@@ -653,13 +771,11 @@
              this.profiler.endSection();
              this.profiler.startSection("remove");
  
@@ -925,7 +929,7 @@
                      this.getChunkFromChunkCoords(j, k).removeEntity(entity);
                  }
  
-@@ -671,40 +783,36 @@
+@@ -671,40 +787,36 @@
          }
      }
  
@@ -983,7 +987,7 @@
                          break;
                      }
  
-@@ -717,8 +825,7 @@
+@@ -717,8 +829,7 @@
                  this.profiler.startSection("ticking");
                  Iterator<NextTickListEntry> iterator = this.pendingTickListEntriesThisTick.iterator();
  
@@ -993,7 +997,7 @@
                      NextTickListEntry nextticklistentry1 = iterator.next();
                      iterator.remove();
                      //Keeping here as a note for future when it may be restored.
-@@ -726,27 +833,20 @@
+@@ -726,27 +837,20 @@
                      //byte b0 = isForced ? 0 : 8;
                      int k = 0;
  
@@ -1026,7 +1030,7 @@
                          this.scheduleUpdate(nextticklistentry1.position, nextticklistentry1.getBlock(), 0);
                      }
                  }
-@@ -759,8 +859,7 @@
+@@ -759,8 +863,7 @@
      }
  
      @Nullable
@@ -1036,7 +1040,7 @@
          ChunkPos chunkpos = chunkIn.getPos();
          int i = (chunkpos.x << 4) - 2;
          int j = i + 16 + 2;
-@@ -770,42 +869,32 @@
+@@ -770,42 +873,32 @@
      }
  
      @Nullable
@@ -1088,7 +1092,7 @@
                          list = Lists.<NextTickListEntry>newArrayList();
                      }
  
-@@ -817,6 +906,7 @@
+@@ -817,6 +910,7 @@
          return list;
      }
  
@@ -1096,7 +1100,7 @@
      public void updateEntityWithOptionalForce(Entity entityIn, boolean forceUpdate)
      {
          if (!this.canSpawnAnimals() && (entityIn instanceof EntityAnimal || entityIn instanceof EntityWaterMob))
-@@ -831,57 +921,98 @@
+@@ -831,57 +925,98 @@
  
          super.updateEntityWithOptionalForce(entityIn, forceUpdate);
      }
@@ -1222,7 +1226,7 @@
                      ;
                  }
  
-@@ -892,8 +1023,7 @@
+@@ -892,8 +1027,7 @@
          }
      }
  
@@ -1232,7 +1236,7 @@
          this.worldInfo.setMapFeaturesEnabled(false);
          this.worldInfo.setAllowCommands(true);
          this.worldInfo.setRaining(false);
-@@ -907,18 +1037,12 @@
+@@ -907,18 +1041,12 @@
          this.getGameRules().setOrCreateGameRule("doDaylightCycle", "false");
      }
  
@@ -1255,7 +1259,7 @@
              if (net.minecraftforge.event.ForgeEventFactory.onCreateWorldSpawn(this, settings)) return;
              this.findingSpawnPoint = true;
              BiomeProvider biomeprovider = this.provider.getBiomeProvider();
-@@ -929,26 +1053,39 @@
+@@ -929,26 +1057,39 @@
              int j = this.provider.getAverageGroundLevel();
              int k = 8;
  
@@ -1303,7 +1307,7 @@
                      break;
                  }
              }
-@@ -956,89 +1093,80 @@
+@@ -956,89 +1097,80 @@
              this.worldInfo.setSpawn(new BlockPos(i, j, k));
              this.findingSpawnPoint = false;
  
@@ -1417,7 +1421,7 @@
          this.worldInfo.setBorderSize(this.getWorldBorder().getDiameter());
          this.worldInfo.getBorderCenterX(this.getWorldBorder().getCenterX());
          this.worldInfo.getBorderCenterZ(this.getWorldBorder().getCenterZ());
-@@ -1053,51 +1181,40 @@
+@@ -1053,51 +1185,40 @@
          this.perWorldStorage.saveAllData();
      }
  
@@ -1486,7 +1490,7 @@
                  }
  
                  this.removeEntityDangerously(entity);
-@@ -1107,92 +1224,86 @@
+@@ -1107,92 +1228,86 @@
          }
      }
  
@@ -1615,7 +1619,7 @@
                  return;
              }
          }
-@@ -1200,18 +1311,15 @@
+@@ -1200,18 +1315,15 @@
          this.blockEventQueue[this.blockEventCacheIndex].add(blockeventdata);
      }
  
@@ -1640,7 +1644,7 @@
                  }
              }
  
-@@ -1219,29 +1327,24 @@
+@@ -1219,29 +1331,24 @@
          }
      }
  
@@ -1675,7 +1679,7 @@
              this.mcServer.getPlayerList().sendPacketToAllPlayersInDimension(new SPacketChangeGameState(8, this.thunderingStrength), this.provider.getDimension());
          }
  
-@@ -1249,14 +1352,10 @@
+@@ -1249,14 +1356,10 @@
           * rather than to all players on the server. This is what causes the client-side rain, as the
           * client believes that it has started raining locally, rather than in another dimension.
           */
@@ -1693,7 +1697,7 @@
                  this.mcServer.getPlayerList().sendPacketToAllPlayersInDimension(new SPacketChangeGameState(1, 0.0F), this.provider.getDimension());
              }
  
-@@ -1266,105 +1365,92 @@
+@@ -1266,105 +1369,92 @@
      }
  
      @Nullable

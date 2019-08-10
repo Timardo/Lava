@@ -1,21 +1,12 @@
 --- ../src-base/minecraft/net/minecraftforge/oredict/ShapedOreRecipe.java
 +++ ../src-work/minecraft/net/minecraftforge/oredict/ShapedOreRecipe.java
-@@ -42,7 +42,7 @@
- 
- import javax.annotation.Nonnull;
- import javax.annotation.Nullable;
--
-+import org.bukkit.inventory.Recipe;
- import com.google.common.collect.Maps;
- import com.google.common.collect.Sets;
- import com.google.gson.JsonArray;
 @@ -254,4 +254,13 @@
          ItemStack result = CraftingHelper.getItemStack(JsonUtils.getJsonObject(json, "result"), context);
          return new ShapedOreRecipe(group.isEmpty() ? null : new ResourceLocation(group), result, primer);
      }
 +
 +    @Override
-+    public Recipe toBukkitRecipe() {
++    public org.bukkit.inventory.Recipe toBukkitRecipe() {
 +        throw new UnsupportedOperationException("Cannot get Bukkit Recipe from ShapedOreRecipe");
 +    }
 +

@@ -161,7 +161,7 @@
      private String worldName;
      private boolean isDemo;
      private boolean enableBonusChest;
-@@ -144,178 +148,263 @@
+@@ -144,178 +148,267 @@
      private final GameProfileRepository profileRepo;
      private final PlayerProfileCache profileCache;
      private long nanoTimeSinceStatusRefresh;
@@ -235,7 +235,11 @@
  
 -    public ServerCommandManager createCommandManager()
 -    {
-+    public abstract PropertyManager getPropertyManager();
++    public MinecraftServer(File file, Proxy proxy, DataFixer dataFixer2, YggdrasilAuthenticationService authServiceIn,
++            MinecraftSessionService sessionServiceIn, GameProfileRepository profileRepoIn,
++            PlayerProfileCache profileCacheIn) {
++        this(org.bukkit.craftbukkit.Main.main(file.list()), proxy, dataFixer2, authServiceIn, sessionServiceIn, profileRepoIn, profileCacheIn);
++    }
 +
 +    public ServerCommandManager createCommandManager() {
          return new ServerCommandManager(this);
@@ -525,7 +529,7 @@
          int i = 16;
          int j = 4;
          int k = 192;
-@@ -323,45 +412,52 @@
+@@ -323,45 +416,52 @@
          int i1 = 0;
          this.setUserMessage("menu.generatingTerrain");
          int j1 = 0;
@@ -605,7 +609,7 @@
          }
      }
  
-@@ -379,112 +475,155 @@
+@@ -379,112 +479,155 @@
  
      public abstract boolean shouldBroadcastConsoleToOps();
  
@@ -665,7 +669,7 @@
  
 -        if (this.getNetworkSystem() != null)
 -        {
-+    public void stopServer() throws MinecraftException {
++    public void stopServer() {
 +        // CraftBukkit start - prevent double stopping on multiple threads
 +        synchronized (stopLock) {
 +            if (hasStopped)
@@ -811,7 +815,7 @@
                  net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStarted();
                  this.currentTime = getCurrentTimeMillis();
                  long i = 0L;
-@@ -492,120 +631,113 @@
+@@ -492,120 +635,113 @@
                  this.statusResponse.setVersion(new ServerStatusResponse.Version("1.12.2", 340));
                  this.applyServerIconToResponse(this.statusResponse);
  
@@ -998,7 +1002,7 @@
                  BufferedImage bufferedimage = ImageIO.read(file1);
                  Validate.validState(bufferedimage.getWidth() == 64, "Must be 64 pixels wide");
                  Validate.validState(bufferedimage.getHeight() == 64, "Must be 64 pixels high");
-@@ -613,52 +745,41 @@
+@@ -613,52 +749,41 @@
                  ByteBuf bytebuf1 = Base64.encode(bytebuf);
                  response.setFavicon("data:image/png;base64," + bytebuf1.toString(StandardCharsets.UTF_8));
                  bytebuf1.release(); // Forge: fix MC-122085
@@ -1061,7 +1065,7 @@
              this.startProfiling = false;
              this.profiler.profilingEnabled = true;
              this.profiler.clearProfiling();
-@@ -667,16 +788,15 @@
+@@ -667,16 +792,15 @@
          this.profiler.startSection("root");
          this.updateTimeLightAndEntities();
  
@@ -1083,7 +1087,7 @@
              }
  
              Collections.shuffle(Arrays.asList(agameprofile));
-@@ -684,7 +804,7 @@
+@@ -684,7 +808,7 @@
              this.statusResponse.invalidateJson();
          }
  
@@ -1092,7 +1096,7 @@
          {
              this.profiler.startSection("save");
              this.playerList.saveAllPlayerData();
-@@ -697,13 +817,11 @@
+@@ -697,13 +821,11 @@
          this.profiler.endSection();
          this.profiler.startSection("snooper");
  
@@ -1108,7 +1112,7 @@
              this.usageSnooper.addMemoryStatsToSnooper();
          }
  
-@@ -712,76 +830,82 @@
+@@ -712,76 +834,82 @@
          net.minecraftforge.fml.common.FMLCommonHandler.instance().onPostServerTick();
      }
  
@@ -1244,7 +1248,7 @@
          }
  
          this.profiler.endStartSection("dim_unloading");
-@@ -794,94 +918,87 @@
+@@ -794,94 +922,87 @@
          this.getFunctionManager().update();
          this.profiler.endStartSection("tickables");
  
@@ -1301,7 +1305,7 @@
  
 -    public String getMinecraftVersion()
 -    {
-+    public WorldServer getWorldServer(int i) {
++    public WorldServer getWorldServer(int i) { //TODO prob remove? Lava-test
 +        WorldServer world = getWorld(i);
 +        return world != null ? world : worlds[0];
 +    }
@@ -1373,7 +1377,7 @@
                  }
              });
          }
-@@ -889,145 +1006,110 @@
+@@ -889,145 +1010,110 @@
          return report;
      }
  
@@ -1559,7 +1563,7 @@
                      worldserver1.getWorldInfo().setDifficulty(difficulty);
                      worldserver1.setAllowedSpawnTypes(this.allowSpawnMonsters(), this.canSpawnAnimals);
                  }
-@@ -1035,80 +1117,75 @@
+@@ -1035,80 +1121,75 @@
          }
      }
  
@@ -1669,7 +1673,7 @@
                      ++l;
                  }
              }
-@@ -1117,228 +1194,186 @@
+@@ -1117,228 +1198,186 @@
          playerSnooper.addClientStat("worlds", Integer.valueOf(l));
      }
  
@@ -1946,7 +1950,7 @@
                      return entity;
                  }
              }
-@@ -1347,130 +1382,120 @@
+@@ -1347,130 +1386,120 @@
          return null;
      }
  
@@ -2120,7 +2124,7 @@
              boolean flag = true;
              String s = null;
              String s1 = ".";
-@@ -1534,13 +1559,19 @@
+@@ -1534,13 +1563,19 @@
                      ++i1;
                  }
              }
@@ -2145,7 +2149,7 @@
              if (s != null)
              {
                  dedicatedserver.setServerOwner(s);
-@@ -1579,84 +1610,87 @@
+@@ -1579,84 +1614,87 @@
                      dedicatedserver.stopServer();
                  }
              });
@@ -2188,7 +2192,7 @@
 -        return false;
 +    public boolean isDebuggingEnabled() {
 +        // return false;
-+        return this.getPropertyManager().getBooleanProperty("debug", false); // CraftBukkit - don't hardcode
++        return ((DedicatedServer)this).settings.getBooleanProperty("debug", false); // CraftBukkit - don't hardcode
      }
  
      @SideOnly(Side.SERVER)

@@ -824,7 +824,7 @@
                  LOGGER.warn("Encountered a problem while converting the player save files, retrying in a few seconds");
                  this.sleepFiveSeconds();
              }
-@@ -665,32 +619,78 @@
+@@ -665,32 +619,72 @@
          return flag || flag1 || flag2 || flag3 || flag4;
      }
  
@@ -913,10 +913,4 @@
 +        }
      }
 +    // CraftBukkit end
-+
-+    // TODO: Check if it's useless
-+    @Override
-+    public PropertyManager getPropertyManager() {
-+        return this.settings;
-+    }
  }

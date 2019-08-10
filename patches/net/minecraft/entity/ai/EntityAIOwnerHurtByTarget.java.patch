@@ -1,14 +1,18 @@
 --- ../src-base/minecraft/net/minecraft/entity/ai/EntityAIOwnerHurtByTarget.java
 +++ ../src-work/minecraft/net/minecraft/entity/ai/EntityAIOwnerHurtByTarget.java
-@@ -41,7 +41,10 @@
+@@ -2,6 +2,7 @@
+ 
+ import net.minecraft.entity.EntityLivingBase;
+ import net.minecraft.entity.passive.EntityTameable;
++import net.minecraft.entity.player.EntityPlayer;
+ 
+ public class EntityAIOwnerHurtByTarget extends EntityAITarget
+ {
+@@ -41,6 +42,7 @@
  
      public void startExecuting()
      {
--        this.taskOwner.setAttackTarget(this.attacker);
-+        //Craftbukkit start - add TargetReason
-+        //this.taskOwner.setAttackTarget(this.attacker);
-+        this.taskOwner.setAttackTarget(this.attacker, org.bukkit.event.entity.EntityTargetEvent.TargetReason.TARGET_ATTACKED_OWNER, true);
-+        //Craftbukkit end
++        org.lavapowered.lava.events.LavaEventHandler.targetReason = org.bukkit.event.entity.EntityTargetEvent.TargetReason.TARGET_ATTACKED_OWNER; //Lava-test - add TargetReason for event
+         this.taskOwner.setAttackTarget(this.attacker);
          EntityLivingBase entitylivingbase = this.tameable.getOwner();
  
-         if (entitylivingbase != null)

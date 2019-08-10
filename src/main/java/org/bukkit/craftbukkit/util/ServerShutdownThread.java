@@ -12,15 +12,6 @@ public class ServerShutdownThread extends Thread {
 
     @Override
     public void run() {
-        try {
-            server.stopServer();
-        } catch (MinecraftException ex) {
-            ex.printStackTrace();
-        } /*finally {
-            try {
-                server.reader.getTerminal().restore();
-            } catch (Exception e) {
-            }
-        }*/
+        server.stopServer();
     }
 }

@@ -17,22 +17,22 @@
                  }
              }
          }
-@@ -270,8 +278,12 @@
+@@ -270,8 +278,13 @@
  
                          if (!this.world.isAnyPlayerWithinRangeAt((double)i1, (double)j1, (double)k1, 7.0D) && this.world.checkNoEntityCollision(entityzombie.getEntityBoundingBox(), entityzombie) && this.world.getCollisionBoxes(entityzombie, entityzombie.getEntityBoundingBox()).isEmpty() && !this.world.containsAnyLiquid(entityzombie.getEntityBoundingBox()))
                          {
 -                            this.world.spawnEntity(entityzombie);
--                            if (entitylivingbase != null) entityzombie.setAttackTarget(entitylivingbase);
-+                            //Craftbukkit start - add reasons
++                            //Craftbukkit start - add reason
 +                            //this.world.spawnEntity(entityzombie);
 +                            this.world.spawnEntity(entityzombie, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.REINFORCEMENTS);
-+                            //if (entitylivingbase != null) entityzombie.setAttackTarget(entitylivingbase);
-+                            if (entitylivingbase != null) entityzombie.setAttackTarget(entitylivingbase, org.bukkit.event.entity.EntityTargetEvent.TargetReason.REINFORCEMENT_TARGET, true);
 +                            //Craftbukkit end
++                            org.lavapowered.lava.events.LavaEventHandler.targetReason = org.bukkit.event.entity.EntityTargetEvent.TargetReason.REINFORCEMENT_TARGET; //Lava-test - add TargetReason
+                             if (entitylivingbase != null) entityzombie.setAttackTarget(entitylivingbase);
++                            org.lavapowered.lava.events.LavaEventHandler.targetReason = null; //Lava-test - reset as it's not guaranteed that we will call the event
                              entityzombie.onInitialSpawn(this.world.getDifficultyForLocation(new BlockPos(entityzombie)), (IEntityLivingData)null);
                              this.getEntityAttribute(SPAWN_REINFORCEMENTS_CHANCE).applyModifier(new AttributeModifier("Zombie reinforcement caller charge", -0.05000000074505806D, 0));
                              entityzombie.getEntityAttribute(SPAWN_REINFORCEMENTS_CHANCE).applyModifier(new AttributeModifier("Zombie reinforcement callee charge", -0.05000000074505806D, 0));
-@@ -299,7 +311,15 @@
+@@ -299,7 +312,15 @@
  
              if (this.getHeldItemMainhand().isEmpty() && this.isBurning() && this.rand.nextFloat() < f * 0.3F)
              {
@@ -49,7 +49,7 @@
              }
          }
  
-@@ -416,7 +436,10 @@
+@@ -416,7 +437,10 @@
                  entityzombievillager.setAlwaysRenderNameTag(entityvillager.getAlwaysRenderNameTag());
              }
  
@@ -61,7 +61,7 @@
              this.world.playEvent((EntityPlayer)null, 1026, new BlockPos(this), 0);
          }
      }
-@@ -443,7 +466,7 @@
+@@ -443,7 +467,7 @@
      {
          livingdata = super.onInitialSpawn(difficulty, livingdata);
          float f = difficulty.getClampedAdditionalDifficulty();
@@ -70,7 +70,7 @@
  
          if (livingdata == null)
          {
-@@ -475,7 +498,10 @@
+@@ -475,7 +499,10 @@
                      entitychicken1.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
                      entitychicken1.onInitialSpawn(difficulty, (IEntityLivingData)null);
                      entitychicken1.setChickenJockey(true);
@@ -82,7 +82,7 @@
                      this.startRiding(entitychicken1);
                  }
              }
-@@ -543,7 +569,7 @@
+@@ -543,7 +570,7 @@
  
      public void onDeath(DamageSource cause)
      {
@@ -91,7 +91,7 @@
  
          if (cause.getTrueSource() instanceof EntityCreeper)
          {
-@@ -560,6 +586,7 @@
+@@ -560,6 +587,7 @@
                  }
              }
          }

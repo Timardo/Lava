@@ -4,42 +4,44 @@
      private float ageWidth = -1.0F;
      private float ageHeight;
  
-+    public boolean ageLocked;
++    public boolean ageLocked; //Craftbukkit field
 +
      public EntityAgeable(World worldIn)
      {
          super(worldIn);
-@@ -48,7 +50,7 @@
+@@ -48,7 +50,10 @@
                      {
                          entityageable.setGrowingAge(-24000);
                          entityageable.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
 -                        this.world.spawnEntity(entityageable);
++                        //Craftbukkit start - add spawn reason
++                        //this.world.spawnEntity(entityageable);
 +                        this.world.spawnEntity(entityageable, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.SPAWNER_EGG);
++                        //Craftbukkit end
  
                          if (itemstack.hasDisplayName())
                          {
-@@ -154,6 +156,7 @@
+@@ -154,6 +159,7 @@
          super.writeEntityToNBT(compound);
          compound.setInteger("Age", this.getGrowingAge());
          compound.setInteger("ForcedAge", this.forcedAge);
-+        compound.setBoolean("AgeLocked", this.ageLocked);
++        compound.setBoolean("AgeLocked", this.ageLocked); //Craftbukkit
      }
  
      public void readEntityFromNBT(NBTTagCompound compound)
-@@ -161,6 +164,7 @@
+@@ -161,6 +167,7 @@
          super.readEntityFromNBT(compound);
          this.setGrowingAge(compound.getInteger("Age"));
          this.forcedAge = compound.getInteger("ForcedAge");
-+        this.ageLocked = compound.getBoolean("AgeLocked");
++        this.ageLocked = compound.getBoolean("AgeLocked"); //Craftbukkit
      }
  
      public void notifyDataManagerChange(DataParameter<?> key)
-@@ -177,7 +181,7 @@
+@@ -176,6 +183,7 @@
+     public void onLivingUpdate()
      {
          super.onLivingUpdate();
++        if (ageLocked) { return; } //Craftbukkit - don't age if the age is locked
  
--        if (this.world.isRemote)
-+        if (this.world.isRemote || ageLocked)
+         if (this.world.isRemote)
          {
-             if (this.forcedAgeTimer > 0)
-             {

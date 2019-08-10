@@ -4,10 +4,10 @@
          this.target = targetIn;
          this.direction = EnumFacing.UP;
          this.selectNextMoveDirection(p_i46772_4_);
-+        projectileSource = (org.bukkit.entity.LivingEntity) ownerIn.getBukkitEntity();
++        projectileSource = (org.bukkit.entity.LivingEntity) ownerIn.getBukkitEntity(); //Craftbukkit
      }
  
-+    // CraftBukkit start
++    // CraftBukkit start - getter/setter methods
 +    public EntityLivingBase getShooter() {
 +        return this.owner;
 +    }

@@ -1,29 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/entity/passive/EntityWolf.java
 +++ ../src-work/minecraft/net/minecraft/entity/passive/EntityWolf.java
-@@ -115,6 +115,22 @@
-         this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(2.0D);
-     }
- 
-+    // CraftBukkit - add overriden version
-+    @Override
-+    public boolean setAttackTarget(@Nullable EntityLivingBase entityliving, org.bukkit.event.entity.EntityTargetEvent.TargetReason reason, boolean fire) {
-+        if (!super.setAttackTarget(entityliving, reason, fire)) {
-+            return false;
-+        }
-+        entityliving = getAttackTarget();
-+        if (entityliving == null) {
-+            this.setAngry(false);
-+        } else if (!this.isTamed()) {
-+            this.setAngry(true);
-+        }
-+        return true;
-+    }
-+    // CraftBukkit end
-+
-     public void setAttackTarget(@Nullable EntityLivingBase entitylivingbaseIn)
-     {
-         super.setAttackTarget(entitylivingbaseIn);
-@@ -395,7 +411,10 @@
+@@ -395,7 +395,10 @@
                              itemstack.shrink(1);
                          }
  
@@ -35,7 +12,7 @@
                          return true;
                      }
                  }
-@@ -422,7 +441,10 @@
+@@ -422,7 +425,10 @@
                  this.aiSit.setSitting(!this.isSitting());
                  this.isJumping = false;
                  this.navigator.clearPath();
@@ -47,7 +24,7 @@
              }
          }
          else if (itemstack.getItem() == Items.BONE && !this.isAngry())
-@@ -440,7 +462,10 @@
+@@ -440,7 +446,10 @@
                      this.navigator.clearPath();
                      this.setAttackTarget((EntityLivingBase)null);
                      this.aiSit.setSitting(true);

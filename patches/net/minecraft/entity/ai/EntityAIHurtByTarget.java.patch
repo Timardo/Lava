@@ -1,25 +1,18 @@
 --- ../src-base/minecraft/net/minecraft/entity/ai/EntityAIHurtByTarget.java
 +++ ../src-work/minecraft/net/minecraft/entity/ai/EntityAIHurtByTarget.java
-@@ -28,7 +28,10 @@
+@@ -28,6 +28,7 @@
  
      public void startExecuting()
      {
--        this.taskOwner.setAttackTarget(this.taskOwner.getRevengeTarget());
-+        //Craftbukkit start - add TargetReason for event
-+        //this.taskOwner.setAttackTarget(this.taskOwner.getRevengeTarget());
-+        this.taskOwner.setAttackTarget(this.taskOwner.getRevengeTarget(), org.bukkit.event.entity.EntityTargetEvent.TargetReason.TARGET_ATTACKED_ENTITY, true);
-+        //Craftbukkit end
++        org.lavapowered.lava.events.LavaEventHandler.targetReason = org.bukkit.event.entity.EntityTargetEvent.TargetReason.TARGET_ATTACKED_ENTITY; //Lava-test - add TargetReason for event
+         this.taskOwner.setAttackTarget(this.taskOwner.getRevengeTarget());
          this.target = this.taskOwner.getAttackTarget();
          this.revengeTimerOld = this.taskOwner.getRevengeTimer();
-         this.unseenMemoryTicks = 300;
-@@ -70,6 +73,9 @@
+@@ -70,6 +71,7 @@
  
      protected void setEntityAttackTarget(EntityCreature creatureIn, EntityLivingBase entityLivingBaseIn)
      {
--        creatureIn.setAttackTarget(entityLivingBaseIn);
-+        //Craftbukkit start - add TargetReason for event
-+        //creatureIn.setAttackTarget(entityLivingBaseIn);
-+        creatureIn.setAttackTarget(entityLivingBaseIn, org.bukkit.event.entity.EntityTargetEvent.TargetReason.TARGET_ATTACKED_NEARBY_ENTITY, true);
-+        //Craftbukkit end
++        org.lavapowered.lava.events.LavaEventHandler.targetReason = org.bukkit.event.entity.EntityTargetEvent.TargetReason.TARGET_ATTACKED_NEARBY_ENTITY; //Lava-test - add TargetReason for event
+         creatureIn.setAttackTarget(entityLivingBaseIn);
      }
  }

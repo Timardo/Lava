@@ -22,7 +22,7 @@
          IBlockState placedAgainst = blockSnapshot.getWorld().getBlockState(blockSnapshot.getPos().offset(direction.getOpposite()));
          EntityPlaceEvent event = new BlockEvent.EntityPlaceEvent(blockSnapshot, placedAgainst, entity);
          MinecraftForge.EVENT_BUS.post(event);
-+        //Lava-test - move bukkit event here
++        //Lava-test - move bukkit event here TODO move all events from this class to LavaEventHandler?
 +        if (entity instanceof EntityEnderman) {
 +            event.setCanceled(org.bukkit.craftbukkit.event.CraftEventFactory.callEntityChangeBlockEvent(entity, blockSnapshot.getPos(), ((EntityEnderman)entity).getHeldBlockState().getBlock(), ((EntityEnderman)entity).getHeldBlockState().getBlock().getMetaFromState(((EntityEnderman)entity).getHeldBlockState())).isCancelled());
 +        }

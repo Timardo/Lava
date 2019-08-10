@@ -1,14 +1,6 @@
 --- ../src-base/minecraft/net/minecraftforge/common/network/ForgeNetworkHandler.java
 +++ ../src-work/minecraft/net/minecraftforge/common/network/ForgeNetworkHandler.java
-@@ -47,11 +47,14 @@
-     }
- 
-     @SideOnly(Side.CLIENT)
--    private static void addClientHandlers()
--    {
-+    private static void addClientHandlers() {
-         FMLEmbeddedChannel clientChannel = channelPair.get(Side.CLIENT);
-         String handlerName = clientChannel.findChannelHandlerNameForType(ForgeRuntimeCodec.class);
+@@ -54,4 +54,8 @@
          clientChannel.pipeline().addAfter(handlerName, "DimensionHandler", new DimensionMessageHandler());
          clientChannel.pipeline().addAfter(handlerName, "FluidIdRegistryHandler", new FluidIdRegistryMessageHandler());
      }

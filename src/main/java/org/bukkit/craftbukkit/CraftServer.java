@@ -169,7 +169,7 @@ public final class CraftServer implements Server {
         this.playerView = Collections
                 .unmodifiableList(Lists.transform(playerList.getPlayers(), EntityPlayerMP::getBukkitEntity));
         this.serverVersion = CraftServer.class.getPackage().getImplementationVersion();
-        online.value = console.getPropertyManager().getBooleanProperty("online-mode", true);
+        online.value = ((DedicatedServer)console).settings.getBooleanProperty("online-mode", true);
 
         Bukkit.setServer(this);
 
@@ -533,15 +533,15 @@ public final class CraftServer implements Server {
 
     // NOTE: Temporary calls through to server.properies until its replaced
     private String getConfigString(String variable, String defaultValue) {
-        return this.console.getPropertyManager().getStringProperty(variable, defaultValue);
+        return ((DedicatedServer)this.console).settings.getStringProperty(variable, defaultValue);
     }
 
     private int getConfigInt(String variable, int defaultValue) {
-        return this.console.getPropertyManager().getIntProperty(variable, defaultValue);
+        return ((DedicatedServer)this.console).settings.getIntProperty(variable, defaultValue);
     }
 
     private boolean getConfigBoolean(String variable, boolean defaultValue) {
-        return this.console.getPropertyManager().getBooleanProperty(variable, defaultValue);
+        return ((DedicatedServer)this.console).settings.getBooleanProperty(variable, defaultValue);
     }
 
     // End Temporary calls
@@ -1307,7 +1307,7 @@ public final class CraftServer implements Server {
     @Override
     public void setWhitelist(boolean value) {
         playerList.setWhiteListEnabled(value);
-        console.getPropertyManager().setProperty("white-list", value);
+        ((DedicatedServer)console).settings.setProperty("white-list", value);
     }
 
     @Override

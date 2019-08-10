@@ -1,32 +1,15 @@
 --- ../src-base/minecraft/net/minecraft/entity/player/InventoryPlayer.java
 +++ ../src-work/minecraft/net/minecraft/entity/player/InventoryPlayer.java
-@@ -1,5 +1,6 @@
- package net.minecraft.entity.player;
- 
-+import java.util.ArrayList;
- import java.util.Arrays;
- import java.util.Iterator;
- import java.util.List;
-@@ -26,6 +27,9 @@
- import net.minecraft.world.World;
- import net.minecraftforge.fml.relauncher.Side;
- import net.minecraftforge.fml.relauncher.SideOnly;
-+import org.bukkit.Location;
-+import org.bukkit.craftbukkit.entity.CraftHumanEntity;
-+import org.bukkit.entity.HumanEntity;
- 
- public class InventoryPlayer implements IInventory
- {
-@@ -38,6 +42,50 @@
+@@ -38,6 +38,50 @@
      private ItemStack itemStack;
      private int timesChanged;
  
 +    // CraftBukkit start - add fields and methods
-+    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    public List<org.bukkit.entity.HumanEntity> transaction = new java.util.ArrayList<org.bukkit.entity.HumanEntity>();
 +    private int maxStack = MAX_STACK;
 +
 +    public List<ItemStack> getContents() {
-+        List<ItemStack> combined = new ArrayList<>(mainInventory.size() + armorInventory.size() + offHandInventory.size());
++        List<ItemStack> combined = new java.util.ArrayList<>(mainInventory.size() + armorInventory.size() + offHandInventory.size());
 +        for (List<ItemStack> sub : this.allInventories) {
 +            combined.addAll(sub);
 +        }
@@ -34,15 +17,15 @@
 +        return combined;
 +    }
 +
-+    public void onOpen(CraftHumanEntity who) {
++    public void onOpen(org.bukkit.craftbukkit.entity.CraftHumanEntity who) {
 +        transaction.add(who);
 +    }
 +
-+    public void onClose(CraftHumanEntity who) {
++    public void onClose(org.bukkit.craftbukkit.entity.CraftHumanEntity who) {
 +        transaction.remove(who);
 +    }
 +
-+    public List<HumanEntity> getViewers() {
++    public List<org.bukkit.entity.HumanEntity> getViewers() {
 +        return transaction;
 +    }
 +
@@ -59,7 +42,7 @@
 +    }
 +
 +    @Override
-+    public Location getLocation() {
++    public org.bukkit.Location getLocation() {
 +        return player.getBukkitEntity().getLocation();
 +    }
 +
@@ -68,7 +51,7 @@
      public InventoryPlayer(EntityPlayer playerIn)
      {
          this.allInventories = Arrays.<NonNullList<ItemStack>>asList(this.mainInventory, this.armorInventory, this.offHandInventory);
-@@ -65,6 +113,23 @@
+@@ -65,6 +109,23 @@
          return stack1.getItem() == stack2.getItem() && (!stack1.getHasSubtypes() || stack1.getMetadata() == stack2.getMetadata()) && ItemStack.areItemStackTagsEqual(stack1, stack2);
      }
  
@@ -92,7 +75,7 @@
      public int getFirstEmptyStack()
      {
          for (int i = 0; i < this.mainInventory.size(); ++i)
-@@ -725,7 +790,7 @@
+@@ -725,7 +786,7 @@
  
      public int getInventoryStackLimit()
      {
@@ -101,7 +84,7 @@
      }
  
      public boolean canHarvestBlock(IBlockState state)
-@@ -802,6 +867,11 @@
+@@ -802,6 +863,11 @@
  
      public ItemStack getItemStack()
      {

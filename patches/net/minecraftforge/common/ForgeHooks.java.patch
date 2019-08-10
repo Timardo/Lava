@@ -14,7 +14,7 @@
          BlockEvent ev = new BlockEvent.CropGrowEvent.Pre(worldIn,pos,state);
          MinecraftForge.EVENT_BUS.post(ev);
 -        return (ev.getResult() == Event.Result.ALLOW || (ev.getResult() == Event.Result.DEFAULT && def));
-+        //Lava-test - move grow event here
++        //Lava-test - move grow event here TODO move all events from here to LavaEventHandler?
 +        return (ev.getResult() == Event.Result.ALLOW || (ev.getResult() == Event.Result.DEFAULT && def)) ? LavaEventFactory.handleGrowEvent(worldIn, pos, state) : false;
      }
  

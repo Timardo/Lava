@@ -1,20 +1,11 @@
 --- ../src-base/minecraft/net/minecraftforge/event/terraingen/TerrainGen.java
 +++ ../src-work/minecraft/net/minecraftforge/event/terraingen/TerrainGen.java
-@@ -21,6 +21,8 @@
- 
- import java.util.Random;
- 
-+import org.lavapowered.lava.events.LavaEventFactory;
-+
- import net.minecraft.util.math.BlockPos;
- import net.minecraft.util.math.ChunkPos;
- import net.minecraft.world.World;
-@@ -106,6 +108,7 @@
+@@ -106,6 +106,7 @@
      {
          SaplingGrowTreeEvent event = new SaplingGrowTreeEvent(world, rand, pos);
          MinecraftForge.TERRAIN_GEN_BUS.post(event);
 -        return event.getResult() != Result.DENY;
-+        //Lava-test - add TreeType setter for bukkit event here
-+        return event.getResult() != Result.DENY ? LavaEventFactory.setTreeType(rand) : false;
++        //Lava-test - add TreeType setter for bukkit event here TODO move to LavaEventHandler?
++        return event.getResult() != Result.DENY ? org.lavapowered.lava.events.LavaEventFactory.setTreeType(rand) : false;
      }
  }

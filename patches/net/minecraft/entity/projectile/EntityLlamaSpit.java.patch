@@ -1,23 +1,15 @@
 --- ../src-base/minecraft/net/minecraft/entity/projectile/EntityLlamaSpit.java
 +++ ../src-work/minecraft/net/minecraft/entity/projectile/EntityLlamaSpit.java
-@@ -5,6 +5,7 @@
- import javax.annotation.Nullable;
- import net.minecraft.block.material.Material;
- import net.minecraft.entity.Entity;
-+import net.minecraft.entity.EntityLivingBase;
- import net.minecraft.entity.IProjectile;
- import net.minecraft.entity.passive.EntityLlama;
- import net.minecraft.nbt.NBTTagCompound;
-@@ -20,7 +21,7 @@
+@@ -20,7 +20,7 @@
  
  public class EntityLlamaSpit extends Entity implements IProjectile
  {
 -    public EntityLlama owner;
-+    public EntityLivingBase owner; // CraftBukkit - type EntityLlama -> EntityLivingBase
++    public net.minecraft.entity.EntityLivingBase owner; // CraftBukkit - type EntityLlama -> EntityLivingBase
      private NBTTagCompound ownerNbt;
  
      public EntityLlamaSpit(World worldIn)
-@@ -211,6 +212,7 @@
+@@ -211,6 +211,7 @@
  
      public void onHit(RayTraceResult p_190536_1_)
      {

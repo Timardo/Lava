@@ -6,8 +6,8 @@
      public int throwableShake;
 -    protected EntityLivingBase thrower;
 -    private String throwerName;
-+    public EntityLivingBase thrower;
-+    public String throwerName;
++    public EntityLivingBase thrower; //Craftbukkit - protected -> public
++    public String throwerName; //Craftbukkit - protected -> public
      private int ticksInGround;
      private int ticksInAir;
      public Entity ignoreEntity;
@@ -19,22 +19,27 @@
      }
  
      protected void entityInit()
-@@ -196,7 +197,7 @@
+@@ -196,7 +197,10 @@
                  {
                      flag = true;
                  }
 -                else if (this.thrower != null && this.ticksExisted < 2 && this.ignoreEntity == null)
-+                else if (this.thrower != null && this.ticksExisted < 2 && this.ignoreEntity == null && this.thrower == entity1) // CraftBukkit - MC-88491
++                //Craftbukkit start - MC-88491
++                //else if (this.thrower != null && this.ticksExisted < 2 && this.ignoreEntity == null)
++                else if (this.thrower != null && this.ticksExisted < 2 && this.ignoreEntity == null && this.thrower == entity1)
++                //Craftbukkit end
                  {
                      this.ignoreEntity = entity1;
                      flag = true;
-@@ -247,6 +248,9 @@
+@@ -247,6 +251,11 @@
              else if (!net.minecraftforge.event.ForgeEventFactory.onProjectileImpact(this, raytraceresult))
              {
                  this.onImpact(raytraceresult);
++                //Craftbukkit start - event
 +                if (this.isDead) {
 +                    org.bukkit.craftbukkit.event.CraftEventFactory.callProjectileHitEvent(this, raytraceresult);
 +                }
++                //Craftbukkit end
              }
          }
  

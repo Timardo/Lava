@@ -1,14 +1,10 @@
 --- ../src-base/minecraft/net/minecraft/entity/monster/EntityVex.java
 +++ ../src-work/minecraft/net/minecraft/entity/monster/EntityVex.java
-@@ -316,7 +316,10 @@
+@@ -316,6 +316,7 @@
  
          public void startExecuting()
          {
--            EntityVex.this.setAttackTarget(EntityVex.this.owner.getAttackTarget());
-+            //Craftbukkit start - add target reason
-+            // EntityVex.this.setAttackTarget(EntityVex.this.owner.getAttackTarget());
-+            EntityVex.this.setAttackTarget(EntityVex.this.owner.getAttackTarget(), org.bukkit.event.entity.EntityTargetEvent.TargetReason.OWNER_ATTACKED_TARGET, true);
-+            //Craftbukkit end
++            org.lavapowered.lava.events.LavaEventHandler.targetReason = org.bukkit.event.entity.EntityTargetEvent.TargetReason.OWNER_ATTACKED_TARGET; //Lava-test - add TargetReason
+             EntityVex.this.setAttackTarget(EntityVex.this.owner.getAttackTarget());
              super.startExecuting();
          }
-     }

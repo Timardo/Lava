@@ -274,6 +274,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         return getHandle().inventoryContainer.getBukkitView();
     }
 
+    //Lava-test - TODO implement this in forge-like way
     private void openCustomInventory(Inventory inventory, EntityPlayerMP player, String windowType) {
         if (player.connection == null) return;
         Container container = new CraftContainer(inventory, this.getHandle(), player.getNextWindowIdCB());
@@ -341,6 +342,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         return getHandle().inventoryContainer.getBukkitView();
     }
 
+    //Lava-test - TODO implement this in forge-like way
     public void openInventory(InventoryView inventory) {
         if (!(getHandle() instanceof EntityPlayerMP)) return; // TODO: NPC support?
         if (((EntityPlayerMP) getHandle()).connection == null) return;

@@ -1,14 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/entity/projectile/EntityFireball.java
 +++ ../src-work/minecraft/net/minecraft/entity/projectile/EntityFireball.java
-@@ -14,6 +14,7 @@
- import net.minecraft.world.World;
- import net.minecraftforge.fml.relauncher.Side;
- import net.minecraftforge.fml.relauncher.SideOnly;
-+import org.bukkit.craftbukkit.event.CraftEventFactory;
- 
- public abstract class EntityFireball extends Entity
- {
-@@ -24,6 +25,9 @@
+@@ -24,6 +24,9 @@
      public double accelerationY;
      public double accelerationZ;
  
@@ -18,7 +10,7 @@
      public EntityFireball(World worldIn)
      {
          super(worldIn);
-@@ -64,12 +68,19 @@
+@@ -64,6 +67,7 @@
      {
          super(worldIn);
          this.shootingEntity = shooter;
@@ -26,47 +18,53 @@
          this.setSize(1.0F, 1.0F);
          this.setLocationAndAngles(shooter.posX, shooter.posY, shooter.posZ, shooter.rotationYaw, shooter.rotationPitch);
          this.setPosition(this.posX, this.posY, this.posZ);
-         this.motionX = 0.0D;
-         this.motionY = 0.0D;
-         this.motionZ = 0.0D;
-+        // CraftBukkit start - Added setDirection method
-+        this.setDirection(accelX, accelY, accelZ);
-+    }
-+
+@@ -78,6 +82,17 @@
+         this.accelerationY = accelY / d0 * 0.1D;
+         this.accelerationZ = accelZ / d0 * 0.1D;
+     }
++    
++    // CraftBukkit method
 +    public void setDirection(double accelX, double accelY, double accelZ) {
-+        // CraftBukkit end
-         accelX = accelX + this.rand.nextGaussian() * 0.4D;
-         accelY = accelY + this.rand.nextGaussian() * 0.4D;
-         accelZ = accelZ + this.rand.nextGaussian() * 0.4D;
-@@ -96,6 +107,11 @@
++        accelX = accelX + this.rand.nextGaussian() * 0.4D;
++        accelY = accelY + this.rand.nextGaussian() * 0.4D;
++        accelZ = accelZ + this.rand.nextGaussian() * 0.4D;
++        double d0 = (double)MathHelper.sqrt(accelX * accelX + accelY * accelY + accelZ * accelZ);
++        this.accelerationX = accelX / d0 * 0.1D;
++        this.accelerationY = accelY / d0 * 0.1D;
++        this.accelerationZ = accelZ / d0 * 0.1D;
++    }
+ 
+     public void onUpdate()
+     {
+@@ -96,6 +111,11 @@
              if (raytraceresult != null && !net.minecraftforge.event.ForgeEventFactory.onProjectileImpact(this, raytraceresult))
              {
                  this.onImpact(raytraceresult);
 +                // CraftBukkit start - Fire ProjectileHitEvent
 +                if (this.isDead) {
-+                    CraftEventFactory.callProjectileHitEvent(this, raytraceresult);
++                    org.bukkit.craftbukkit.event.CraftEventFactory.callProjectileHitEvent(this, raytraceresult);
 +                }
 +                // CraftBukkit end
              }
  
              this.posX += this.motionX;
-@@ -209,6 +225,11 @@
+@@ -209,6 +229,11 @@
  
              if (source.getTrueSource() != null)
              {
 +                // CraftBukkit start
-+                if (CraftEventFactory.handleNonLivingEntityDamageEvent(this, source, amount)) {
++                if (org.bukkit.craftbukkit.event.CraftEventFactory.handleNonLivingEntityDamageEvent(this, source, amount)) {
 +                    return false;
 +                }
 +                // CraftBukkit end
                  Vec3d vec3d = source.getTrueSource().getLookVec();
  
                  if (vec3d != null)
-@@ -224,6 +245,7 @@
+@@ -224,6 +249,7 @@
                  if (source.getTrueSource() instanceof EntityLivingBase)
                  {
                      this.shootingEntity = (EntityLivingBase)source.getTrueSource();
-+                    this.projectileSource = (org.bukkit.projectiles.ProjectileSource) this.shootingEntity.getBukkitEntity();
++                    this.projectileSource = (org.bukkit.projectiles.ProjectileSource) this.shootingEntity.getBukkitEntity(); //Craftbukkit - add projectile source for handling
                  }
  
                  return true;

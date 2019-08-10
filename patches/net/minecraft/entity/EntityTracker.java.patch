@@ -5,7 +5,7 @@
      private final WorldServer world;
      private final Set<EntityTrackerEntry> entries = Sets.<EntityTrackerEntry>newHashSet();
 -    private final IntHashMap<EntityTrackerEntry> trackedEntityHashTable = new IntHashMap<EntityTrackerEntry>();
-+    public final IntHashMap<EntityTrackerEntry> trackedEntityHashTable = new IntHashMap<EntityTrackerEntry>();
++    public final IntHashMap<EntityTrackerEntry> trackedEntityHashTable = new IntHashMap<EntityTrackerEntry>(); //Craftbukkit - private - public
      private int maxTrackingDistanceThreshold;
  
      public EntityTracker(WorldServer theWorldIn)
@@ -14,7 +14,7 @@
          else if (entityIn instanceof EntityAreaEffectCloud)
          {
 -            this.track(entityIn, 160, Integer.MAX_VALUE, true);
-+            this.track(entityIn, 160,10, true); // CraftBukkit
++            this.track(entityIn, 160, 10, true); // CraftBukkit - Integer.MAX_VALUE -> 10
          }
          else if (entityIn instanceof EntityEnderCrystal)
          {

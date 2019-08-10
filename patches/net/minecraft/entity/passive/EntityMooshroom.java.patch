@@ -1,41 +1,20 @@
 --- ../src-base/minecraft/net/minecraft/entity/passive/EntityMooshroom.java
 +++ ../src-work/minecraft/net/minecraft/entity/passive/EntityMooshroom.java
-@@ -16,6 +16,8 @@
- import net.minecraft.world.World;
- import net.minecraft.world.storage.loot.LootTableList;
- 
-+import javax.annotation.Nullable;
-+
- public class EntityMooshroom extends EntityCow implements net.minecraftforge.common.IShearable
- {
-     public EntityMooshroom(World worldIn)
-@@ -38,12 +40,9 @@
-         {
-             itemstack.shrink(1);
- 
--            if (itemstack.isEmpty())
--            {
-+            if (itemstack.isEmpty()) {
+@@ -41,8 +41,7 @@
+             if (itemstack.isEmpty())
+             {
                  player.setHeldItem(hand, new ItemStack(Items.MUSHROOM_STEW));
 -            }
 -            else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.MUSHROOM_STEW)))
--            {
-+            } else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.MUSHROOM_STEW))) {
++            } else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.MUSHROOM_STEW)))
+             {
                  player.dropItem(new ItemStack(Items.MUSHROOM_STEW), false);
              }
- 
-@@ -90,8 +89,13 @@
-         return new EntityMooshroom(this.world);
+@@ -91,6 +90,7 @@
      }
  
--    @Override public boolean isShearable(ItemStack item, net.minecraft.world.IBlockAccess world, net.minecraft.util.math.BlockPos pos){ return getGrowingAge() >= 0; }
-     @Override
-+    public boolean isShearable(ItemStack item, net.minecraft.world.IBlockAccess world, net.minecraft.util.math.BlockPos pos)
-+    {
-+        return getGrowingAge() >= 0;
-+    }
+     @Override public boolean isShearable(ItemStack item, net.minecraft.world.IBlockAccess world, net.minecraft.util.math.BlockPos pos){ return getGrowingAge() >= 0; }
 +
-+    @Override
+     @Override
      public java.util.List<ItemStack> onSheared(ItemStack item, net.minecraft.world.IBlockAccess world, net.minecraft.util.math.BlockPos pos, int fortune)
      {
-         this.setDead();

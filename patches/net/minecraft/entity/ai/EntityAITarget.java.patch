@@ -1,26 +1,18 @@
 --- ../src-base/minecraft/net/minecraft/entity/ai/EntityAITarget.java
 +++ ../src-work/minecraft/net/minecraft/entity/ai/EntityAITarget.java
-@@ -92,7 +92,10 @@
+@@ -92,6 +92,7 @@
                      }
                      else
                      {
--                        this.taskOwner.setAttackTarget(entitylivingbase);
-+                        //Craftbukkit start - add TargetReason
-+                        //this.taskOwner.setAttackTarget(entitylivingbase);
-+                        this.taskOwner.setAttackTarget(entitylivingbase, org.bukkit.event.entity.EntityTargetEvent.TargetReason.CLOSEST_ENTITY, true);
-+                        //Craftbukkit end
++                        org.lavapowered.lava.events.LavaEventHandler.targetReason = org.bukkit.event.entity.EntityTargetEvent.TargetReason.CLOSEST_ENTITY; //Lava-test - add TargetReason for event
+                         this.taskOwner.setAttackTarget(entitylivingbase);
                          return true;
                      }
-                 }
-@@ -115,7 +118,10 @@
+@@ -115,6 +116,7 @@
  
      public void resetTask()
      {
--        this.taskOwner.setAttackTarget((EntityLivingBase)null);
-+        //Craftbukkit start - add TargetReason
-+        //this.taskOwner.setAttackTarget((EntityLivingBase)null);
-+        this.taskOwner.setAttackTarget((EntityLivingBase)null, org.bukkit.event.entity.EntityTargetEvent.TargetReason.FORGOT_TARGET, true);
-+        //Craftbukkit end
++        org.lavapowered.lava.events.LavaEventHandler.targetReason = org.bukkit.event.entity.EntityTargetEvent.TargetReason.FORGOT_TARGET; //Lava-test - add TargetReason for event
+         this.taskOwner.setAttackTarget((EntityLivingBase)null);
          this.target = null;
      }
- 

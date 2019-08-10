@@ -5,11 +5,11 @@
      private static final DataParameter<Integer> COLOR = EntityDataManager.<Integer>createKey(EntityTippedArrow.class, DataSerializers.VARINT);
      private PotionType potion = PotionTypes.EMPTY;
 -    private final Set<PotionEffect> customPotionEffects = Sets.<PotionEffect>newHashSet();
-+    public final Set<PotionEffect> customPotionEffects = Sets.<PotionEffect>newHashSet(); //CraftBukkit
++    public final Set<PotionEffect> customPotionEffects = Sets.<PotionEffect>newHashSet(); //CraftBukkit - private -> public
      private boolean fixedColor;
  
      public EntityTippedArrow(World worldIn)
-@@ -146,12 +146,30 @@
+@@ -146,12 +146,31 @@
          }
      }
  
@@ -30,6 +30,7 @@
 +    public boolean isTipped() {
 +        return !(this.customPotionEffects.isEmpty() && this.potion == PotionTypes.EMPTY);
 +    }
++    //Craftbukkit end
 +
      public int getColor()
      {
@@ -37,7 +38,7 @@
      }
  
 -    private void setFixedColor(int p_191507_1_)
-+    public void setFixedColor(int p_191507_1_)
++    public void setFixedColor(int p_191507_1_) //Craftbukkit - private -> public
      {
          this.fixedColor = true;
          this.dataManager.set(COLOR, Integer.valueOf(p_191507_1_));

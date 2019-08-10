@@ -30,6 +30,7 @@ public class AutoLibraryDownloader {
                 ReadableByteChannel rbc = Channels.newChannel(website.openStream());
                 FileOutputStream fos = new FileOutputStream(fileName);
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                fos.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -53,6 +54,7 @@ public class AutoLibraryDownloader {
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
                 System.out.println("Extracting Zip");
                 unzip(minecraftlibraries, ".");
+                fos.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

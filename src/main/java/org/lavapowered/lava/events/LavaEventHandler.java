@@ -1,17 +1,46 @@
 package org.lavapowered.lava.events;
 
+import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.entity.CraftItem;
+import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.event.CraftEventFactory;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.util.CraftChatMessage;
+import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
+import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityShulker;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
+import net.minecraft.scoreboard.Team;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
+import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.EnderTeleportEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
+import net.minecraftforge.event.entity.player.PlayerDropsEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-public class LavaEventHandler
-{
+public class LavaEventHandler {
+    
+    public static boolean waitForDropEvent = false;
+    public static ITextComponent[] chatMessage;
+    public static TargetReason targetReason;
+    public static EntityLivingBase originalTarget;
+    
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onEnderTeleportEvent(EnderTeleportEvent e) {
         if (e.getEntityLiving() instanceof EntityPlayerMP) {
@@ -40,5 +69,135 @@ public class LavaEventHandler
                 e.setCanceled(true);
             }
         }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onPlayerTosssEvent(ItemTossEvent e) {
+        Player player = (Player)e.getPlayer().getBukkitEntity();
+        CraftItem drop = new CraftItem((CraftServer)Bukkit.getServer(), e.getEntityItem());
+
+        PlayerDropItemEvent event = new PlayerDropItemEvent(player, drop);
+        Bukkit.getPluginManager().callEvent(event);
+
+        if (event.isCancelled()) {
+            e.setCanceled(true);
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onLivingDeathEvent(LivingDeathEvent e) {
+        if (e.getEntityLiving() instanceof EntityPlayerMP) {
+            EntityPlayerMP player = (EntityPlayerMP)e.getEntityLiving();
+            
+            if (player.dead) {
+                e.setCanceled(true);
+                return;
+            }
+            
+            //This is just preparation since forge has divided events
+            boolean dropItems = !player.world.getGameRules().getBoolean("keepInventory") && !player.isSpectator(); //used in death event
+
+            if (dropItems) { //we will drop items, prepare and wait for PlayerDropsEvent
+                waitForDropEvent = true;
+                return;
+            }
+
+            //no item drops, let's just call the death event
+            ITextComponent chatmessage = player.getCombatTracker().getDeathMessage();
+
+            String deathmessage = chatmessage.getFormattedText();
+            org.bukkit.event.entity.PlayerDeathEvent deathEvent = CraftEventFactory.callPlayerDeathEvent(player, new java.util.ArrayList<>(player.inventory.getSizeInventory()), deathmessage, true);
+            chatMessage = CraftChatMessage.fromString(deathEvent.getDeathMessage());
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onPlayerDropEvent(PlayerDropsEvent e) {
+        if (e.getEntityPlayer() instanceof EntityPlayerMP) {
+            EntityPlayerMP player = (EntityPlayerMP)e.getEntityLiving();
+            
+            if (waitForDropEvent) {
+                waitForDropEvent = false;
+                List<org.bukkit.inventory.ItemStack> loot = new java.util.ArrayList<>(player.inventory.getSizeInventory());
+            
+                for (EntityItem item : e.getDrops()) {
+                    loot.add(CraftItemStack.asCraftMirror(item.getItem())); //add loot from captured loot
+                }
+
+                String deathMessage = player.getCombatTracker().getDeathMessage().getFormattedText();
+                org.bukkit.event.entity.PlayerDeathEvent deathEvent = CraftEventFactory.callPlayerDeathEvent(player, loot, deathMessage, false);
+                deathMessage = deathEvent.getDeathMessage();
+
+                if (player.world.getGameRules().getBoolean("showDeathMessages"))
+                {
+                    Team team = player.getTeam();
+                    
+                    if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS)
+                    {
+                        if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS)
+                        {
+                            player.mcServer.getPlayerList().sendMessageToAllTeamMembers(player, player.getCombatTracker().getDeathMessage());
+                        }
+                        else if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OWN_TEAM)
+                        {
+                            player.mcServer.getPlayerList().sendMessageToTeamOrAllPlayers(player, player.getCombatTracker().getDeathMessage());
+                        }
+                    }
+                    else
+                    {
+                        player.mcServer.getPlayerList().sendMessage(CraftChatMessage.fromString(deathMessage));
+                    }
+                }
+            }
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onEntityTravelToDimensionEvent(EntityTravelToDimensionEvent e) {
+        if (e.getEntity() instanceof EntityPlayerMP) {
+            if (((EntityPlayerMP)e.getEntity()).isPlayerSleeping()) {
+                e.setCanceled(true); //Craftbukkit stuff - SPIGOT-3154
+            }
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onLivingSetAttackTargetEvent(LivingSetAttackTargetEvent e) {
+        TargetReason reason = targetReason;
+        EntityLivingBase originalTarget = this.originalTarget;
+        this.originalTarget = null;
+        targetReason = null; //reset now to save some space with returns
+        
+        if (reason == TargetReason.DONTCALLEVENT) return; //called from CB
+        EntityLivingBase entity = e.getEntityLiving();
+        EntityLivingBase target = e.getTarget();
+        
+        if (((EntityLiving)entity).getAttackTarget() == target) return; //the target didn't change, skip
+        if (reason == TargetReason.UNKNOWN && ((EntityLiving) entity).getAttackTarget() != null && target == null) {
+            reason = ((EntityLiving) entity).getAttackTarget().isEntityAlive() ? TargetReason.FORGOT_TARGET : TargetReason.TARGET_DIED;
+        }
+        
+        if (reason == TargetReason.UNKNOWN) {
+            ; //nothing yet TODO
+        }
+        
+        CraftLivingEntity ctarget = null;
+        
+        if (target != null) {
+            ctarget = (CraftLivingEntity) target.getBukkitEntity();
+        }
+        EntityTargetLivingEntityEvent event = new EntityTargetLivingEntityEvent(entity.getBukkitEntity(), ctarget, reason);
+        Bukkit.getPluginManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            ((EntityLiving)entity).setAttackTarget(originalTarget); //reset the target to previous entity
+        }
+
+        if (event.getTarget() != null) {
+            target = ((CraftLivingEntity) event.getTarget()).getHandle();
+        } else {
+            target = null;
+        }
+        ((EntityLiving)entity).setAttackTarget(target); //override the attack target
     }
 }

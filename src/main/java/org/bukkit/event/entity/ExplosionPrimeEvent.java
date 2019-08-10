@@ -25,6 +25,11 @@ public class ExplosionPrimeEvent extends EntityEvent implements Cancellable {
         this(explosive, explosive.getYield(), explosive.isIncendiary());
     }
 
+    //Lava-test constructor - easier implementation of forge's event
+    public ExplosionPrimeEvent(final Explosive explosive, final boolean fire) {
+        this(explosive, explosive.getYield(), fire);
+    }
+
     public static HandlerList getHandlerList() {
         return handlers;
     }
