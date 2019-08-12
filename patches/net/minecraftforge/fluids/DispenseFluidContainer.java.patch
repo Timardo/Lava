@@ -1,0 +1,27 @@
+--- ../src-base/minecraft/net/minecraftforge/fluids/DispenseFluidContainer.java
++++ ../src-work/minecraft/net/minecraftforge/fluids/DispenseFluidContainer.java
+@@ -51,6 +51,24 @@
+     @Nonnull
+     public ItemStack dispenseStack(@Nonnull IBlockSource source, @Nonnull ItemStack stack)
+     {
++        //Lava-test start - add event here
++        BlockPos blockpos = source.getBlockPos().offset((EnumFacing)source.getBlockState().getValue(BlockDispenser.FACING));
++        org.bukkit.block.Block bukkitBlock = source.getWorld().getWorld().getBlockAt(source.getBlockPos().getX(), source.getBlockPos().getY(), source.getBlockPos().getZ());
++        org.bukkit.craftbukkit.inventory.CraftItemStack craftItem = org.bukkit.craftbukkit.inventory.CraftItemStack.asCraftMirror(stack);
++        org.bukkit.event.block.BlockDispenseEvent event = new org.bukkit.event.block.BlockDispenseEvent(bukkitBlock, craftItem.clone(), new org.bukkit.util.Vector(blockpos.getX(), blockpos.getY(), blockpos.getZ()));
++        source.getWorld().getServer().getPluginManager().callEvent(event);
++
++        if (event.isCancelled()) return stack; //cancelled event, don't do anything
++        if (!event.getItem().equals(craftItem)) { //new item
++            ItemStack eventStack = org.bukkit.craftbukkit.inventory.CraftItemStack.asNMSCopy(event.getItem());
++            net.minecraft.dispenser.IBehaviorDispenseItem idispensebehavior = BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getObject(eventStack.getItem());
++            if (idispensebehavior != net.minecraft.dispenser.IBehaviorDispenseItem.DEFAULT_BEHAVIOR && idispensebehavior != this) {
++                idispensebehavior.dispense(source, eventStack);
++                return stack; //dispense something else and let the original stack intact
++            }
++        }
++        //Lava-test end - it gets here when the event is not cancelled or the behavior didn't change
++
+         if (FluidUtil.getFluidContained(stack) != null)
+         {
+             return dumpContainer(source, stack);

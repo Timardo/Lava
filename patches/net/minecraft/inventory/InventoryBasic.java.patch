@@ -1,20 +1,11 @@
 --- ../src-base/minecraft/net/minecraft/inventory/InventoryBasic.java
 +++ ../src-work/minecraft/net/minecraft/inventory/InventoryBasic.java
-@@ -10,6 +10,9 @@
- import net.minecraft.util.text.TextComponentTranslation;
- import net.minecraftforge.fml.relauncher.Side;
- import net.minecraftforge.fml.relauncher.SideOnly;
-+import org.bukkit.Location;
-+import org.bukkit.craftbukkit.entity.CraftHumanEntity;
-+import org.bukkit.entity.HumanEntity;
- 
- public class InventoryBasic implements IInventory
- {
-@@ -19,8 +22,46 @@
+@@ -19,8 +19,52 @@
      private List<IInventoryChangedListener> changeListeners;
      private boolean hasCustomName;
  
-+    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    //Craftbukkit start - fields, methods
++    public List<org.bukkit.entity.HumanEntity> transaction = new java.util.ArrayList<org.bukkit.entity.HumanEntity>();
 +    private int maxStack = MAX_STACK;
 +    protected org.bukkit.inventory.InventoryHolder bukkitOwner;
 +
@@ -26,15 +17,15 @@
 +        maxStack = i;
 +    }
 +
-+    public void onOpen(CraftHumanEntity who) {
++    public void onOpen(org.bukkit.craftbukkit.entity.CraftHumanEntity who) {
 +        transaction.add(who);
 +    }
 +
-+    public void onClose(CraftHumanEntity who) {
++    public void onClose(org.bukkit.craftbukkit.entity.CraftHumanEntity who) {
 +        transaction.remove(who);
 +    }
 +
-+    public List<HumanEntity> getViewers() {
++    public List<org.bukkit.entity.HumanEntity> getViewers() {
 +        return transaction;
 +    }
 +
@@ -43,17 +34,22 @@
 +    }
 +
 +    @Override
-+    public Location getLocation() {
++    public org.bukkit.Location getLocation() {
 +        return null;
-+    }
-+
-     public InventoryBasic(String title, boolean customName, int slotCount)
-     {
-+        this(title, customName, slotCount, null);
 +    }
 +
 +    public InventoryBasic(String title, boolean customName, int slotCount, org.bukkit.inventory.InventoryHolder owner) {
 +        this.bukkitOwner = owner;
++        this.inventoryTitle = title;
++        this.hasCustomName = customName;
++        this.slotsCount = slotCount;
++        this.inventoryContents = NonNullList.<ItemStack>withSize(slotCount, ItemStack.EMPTY);
++    }
++    //Craftbukkit end
++
+     public InventoryBasic(String title, boolean customName, int slotCount)
+     {
++        this.bukkitOwner = null; //Craftbukkit
          this.inventoryTitle = title;
          this.hasCustomName = customName;
          this.slotsCount = slotCount;

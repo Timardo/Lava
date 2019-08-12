@@ -1,23 +1,10 @@
 --- ../src-base/minecraft/net/minecraft/inventory/ContainerPlayer.java
 +++ ../src-work/minecraft/net/minecraft/inventory/ContainerPlayer.java
-@@ -9,19 +9,30 @@
- import net.minecraft.item.ItemStack;
- import net.minecraftforge.fml.relauncher.Side;
- import net.minecraftforge.fml.relauncher.SideOnly;
-+import org.bukkit.craftbukkit.inventory.CraftInventoryCrafting;
-+import org.bukkit.craftbukkit.inventory.CraftInventoryView;
- 
- public class ContainerPlayer extends Container
- {
-     private static final EntityEquipmentSlot[] VALID_EQUIPMENT_SLOTS = new EntityEquipmentSlot[] {EntityEquipmentSlot.HEAD, EntityEquipmentSlot.CHEST, EntityEquipmentSlot.LEGS, EntityEquipmentSlot.FEET};
--    public InventoryCrafting craftMatrix = new InventoryCrafting(this, 2, 2);
--    public InventoryCraftResult craftResult = new InventoryCraftResult();
-+    public InventoryCrafting craftMatrix; // CraftBukkit - move initialization into constructor
-+    public InventoryCraftResult craftResult; // CraftBukkit - move initialization into constructor
+@@ -18,10 +18,18 @@
      public boolean isLocalWorld;
      private final EntityPlayer player;
  
-+    private CraftInventoryView bukkitEntity = null;
++    private org.bukkit.craftbukkit.inventory.CraftInventoryView bukkitEntity = null;
 +    private InventoryPlayer playerInventory;
 +
      public ContainerPlayer(InventoryPlayer playerInventory, boolean localWorld, EntityPlayer playerIn)
@@ -25,27 +12,27 @@
          this.isLocalWorld = localWorld;
          this.player = playerIn;
 +        // CraftBukkit start
-+        this.craftResult = new InventoryCraftResult(); // CraftBukkit - moved to before InventoryCrafting construction
-+        this.craftMatrix = new InventoryCrafting(this, 2, 2, playerInventory.player); // CraftBukkit - pass player
++        this.craftMatrix.owner = playerIn;
 +        this.craftMatrix.resultInventory = this.craftResult; // CraftBukkit - let InventoryCrafting know about its result slot
 +        this.playerInventory = playerInventory; // CraftBukkit - save player
 +        // CraftBukkit end
          this.addSlotToContainer(new SlotCrafting(playerInventory.player, this.craftMatrix, this.craftResult, 0, 154, 28));
  
          for (int i = 0; i < 2; ++i)
-@@ -202,4 +213,15 @@
+@@ -202,4 +210,16 @@
      {
          return slotIn.inventory != this.craftResult && super.canMergeSlot(stack, slotIn);
      }
 +
++    //Craftbukkit method
 +    @Override
-+    public CraftInventoryView getBukkitView() {
++    public org.bukkit.craftbukkit.inventory.CraftInventoryView getBukkitView() {
 +        if (bukkitEntity != null) {
 +            return bukkitEntity;
 +        }
 +
-+        CraftInventoryCrafting inventory = new CraftInventoryCrafting(this.craftMatrix, this.craftResult);
-+        bukkitEntity = new CraftInventoryView(this.playerInventory.player.getBukkitEntity(), inventory, this);
++        org.bukkit.craftbukkit.inventory.CraftInventoryCrafting inventory = new org.bukkit.craftbukkit.inventory.CraftInventoryCrafting(this.craftMatrix, this.craftResult);
++        bukkitEntity = new org.bukkit.craftbukkit.inventory.CraftInventoryView(this.playerInventory.player.getBukkitEntity(), inventory, this);
 +        return bukkitEntity;
 +    }
  }

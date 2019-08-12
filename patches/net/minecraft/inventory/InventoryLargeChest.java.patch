@@ -1,47 +1,38 @@
 --- ../src-base/minecraft/net/minecraft/inventory/InventoryLargeChest.java
 +++ ../src-work/minecraft/net/minecraft/inventory/InventoryLargeChest.java
-@@ -8,13 +8,59 @@
- import net.minecraft.util.text.TextComponentTranslation;
- import net.minecraft.world.ILockableContainer;
- import net.minecraft.world.LockCode;
-+import org.bukkit.Location;
-+import org.bukkit.craftbukkit.entity.CraftHumanEntity;
-+import org.bukkit.entity.HumanEntity;
- 
-+import java.util.ArrayList;
-+import java.util.List;
-+
+@@ -12,9 +12,51 @@
  public class InventoryLargeChest implements ILockableContainer
  {
      private final String name;
 -    private final ILockableContainer upperChest;
 -    private final ILockableContainer lowerChest;
-+    public final ILockableContainer upperChest;
-+    public final ILockableContainer lowerChest;
++    public final ILockableContainer upperChest; //Craftbukkit - private -> public
++    public final ILockableContainer lowerChest; //Craftbukkit - private -> public
  
-+    public List<HumanEntity> transaction = new ArrayList<HumanEntity>();
++    //Craftbukkit start - methods..
++    public java.util.List<org.bukkit.entity.HumanEntity> transaction = new java.util.ArrayList<org.bukkit.entity.HumanEntity>();
 +
-+    public List<ItemStack> getContents() {
-+        List<ItemStack> result = new ArrayList<ItemStack>(this.getSizeInventory());
++    public java.util.List<ItemStack> getContents() {
++        java.util.List<ItemStack> result = new java.util.ArrayList<ItemStack>(this.getSizeInventory());
 +        for (int i = 0; i < this.getSizeInventory(); i++) {
 +            result.add(this.getStackInSlot(i));
 +        }
 +        return result;
 +    }
 +
-+    public void onOpen(CraftHumanEntity who) {
++    public void onOpen(org.bukkit.craftbukkit.entity.CraftHumanEntity who) {
 +        this.upperChest.onOpen(who);
 +        this.lowerChest.onOpen(who);
 +        transaction.add(who);
 +    }
 +
-+    public void onClose(CraftHumanEntity who) {
++    public void onClose(org.bukkit.craftbukkit.entity.CraftHumanEntity who) {
 +         this.upperChest.onClose(who);
 +         this.lowerChest.onClose(who);
 +        transaction.remove(who);
 +    }
 +
-+    public List<HumanEntity> getViewers() {
++    public java.util.List<org.bukkit.entity.HumanEntity> getViewers() {
 +        return transaction;
 +    }
 +
@@ -55,20 +46,23 @@
 +    }
 +
 +    @Override
-+    public Location getLocation() {
++    public org.bukkit.Location getLocation() {
 +        return upperChest.getLocation(); // TODO: right?
 +    }
++    //Craftbukkit end
 +
      public InventoryLargeChest(String nameIn, ILockableContainer upperChestIn, ILockableContainer lowerChestIn)
      {
          this.name = nameIn;
-@@ -108,7 +154,8 @@
+@@ -108,7 +150,10 @@
  
      public int getInventoryStackLimit()
      {
 -        return this.upperChest.getInventoryStackLimit();
++        //Craftbukkit start
 +        // return this.upperChest.getInventoryStackLimit();
-+        return Math.min(this.upperChest.getInventoryStackLimit(), this.lowerChest.getInventoryStackLimit()); // CraftBukkit - check both sides
++        return Math.min(this.upperChest.getInventoryStackLimit(), this.lowerChest.getInventoryStackLimit()); //check both sides
++        //Craftbukkit end
      }
  
      public void markDirty()

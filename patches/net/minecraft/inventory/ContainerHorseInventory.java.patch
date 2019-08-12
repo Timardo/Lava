@@ -1,11 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/inventory/ContainerHorseInventory.java
 +++ ../src-work/minecraft/net/minecraft/inventory/ContainerHorseInventory.java
-@@ -3,18 +3,25 @@
- import net.minecraft.entity.passive.AbstractChestHorse;
- import net.minecraft.entity.passive.AbstractHorse;
- import net.minecraft.entity.player.EntityPlayer;
-+import net.minecraft.entity.player.InventoryPlayer;
- import net.minecraft.init.Items;
+@@ -7,14 +7,22 @@
  import net.minecraft.item.ItemStack;
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
@@ -17,27 +12,24 @@
      private final IInventory horseInventory;
      private final AbstractHorse horse;
  
++    //Craftbukkit start - fields
 +    org.bukkit.craftbukkit.inventory.CraftInventoryView bukkitEntity;
-+    InventoryPlayer player;
++    net.minecraft.entity.player.InventoryPlayer player;
++    //Craftbukkit end
 +
      public ContainerHorseInventory(IInventory playerInventory, IInventory horseInventoryIn, final AbstractHorse horse, EntityPlayer player)
      {
-+        this.player = (InventoryPlayer) playerInventory;
++        this.player = (net.minecraft.entity.player.InventoryPlayer) playerInventory; //Craftbukkit
          this.horseInventory = horseInventoryIn;
          this.horse = horse;
          int i = 3;
-@@ -133,4 +140,14 @@
+@@ -133,4 +141,9 @@
          super.onContainerClosed(playerIn);
          this.horseInventory.closeInventory(playerIn);
      }
 +
++    //Craftbukkit method
 +    @Override
-+    public InventoryView getBukkitView() {
-+        if (bukkitEntity != null) {
-+            return bukkitEntity;
-+        }
-+
-+        return bukkitEntity = new CraftInventoryView(player.player.getBukkitEntity(), horseInventory.getOwner().getInventory(), this);
-+    }
++    public InventoryView getBukkitView() { return bukkitEntity == null ? bukkitEntity = new CraftInventoryView(player.player.getBukkitEntity(), horseInventory.getOwner().getInventory(), this) : bukkitEntity; }
 +
  }

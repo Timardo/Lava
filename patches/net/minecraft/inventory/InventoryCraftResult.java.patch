@@ -1,37 +1,22 @@
 --- ../src-base/minecraft/net/minecraft/inventory/InventoryCraftResult.java
 +++ ../src-work/minecraft/net/minecraft/inventory/InventoryCraftResult.java
-@@ -1,5 +1,6 @@
- package net.minecraft.inventory;
- 
-+import java.util.List;
- import javax.annotation.Nullable;
- import net.minecraft.entity.player.EntityPlayer;
- import net.minecraft.item.ItemStack;
-@@ -8,12 +9,46 @@
- import net.minecraft.util.text.ITextComponent;
- import net.minecraft.util.text.TextComponentString;
- import net.minecraft.util.text.TextComponentTranslation;
-+import org.bukkit.Location;
-+import org.bukkit.craftbukkit.entity.CraftHumanEntity;
-+import org.bukkit.entity.HumanEntity;
- 
- public class InventoryCraftResult implements IInventory
- {
+@@ -14,6 +14,39 @@
      private final NonNullList<ItemStack> stackResult = NonNullList.<ItemStack>withSize(1, ItemStack.EMPTY);
      private IRecipe recipeUsed;
  
++    //Craftbukkit start - fields, methods..
 +    private int maxStack = MAX_STACK;
-+    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    public java.util.List<org.bukkit.entity.HumanEntity> transaction = new java.util.ArrayList<org.bukkit.entity.HumanEntity>();
 +
-+    public void onOpen(CraftHumanEntity who) {
++    public void onOpen(org.bukkit.craftbukkit.entity.CraftHumanEntity who) {
 +        transaction.add(who);
 +    }
 +
-+    public void onClose(CraftHumanEntity who) {
++    public void onClose(org.bukkit.craftbukkit.entity.CraftHumanEntity who) {
 +        transaction.remove(who);
 +    }
 +
-+    public List<HumanEntity> getViewers() {
++    public java.util.List<org.bukkit.entity.HumanEntity> getViewers() {
 +        return transaction;
 +    }
 +    public java.util.List<ItemStack> getContents() {
@@ -47,19 +32,20 @@
 +    }
 +
 +    @Override
-+    public Location getLocation() {
++    public org.bukkit.Location getLocation() {
 +        return null;
 +    }
++    //Craftbukkit end
 +
      public int getSizeInventory()
      {
          return 1;
-@@ -69,7 +104,7 @@
+@@ -69,7 +102,7 @@
  
      public int getInventoryStackLimit()
      {
 -        return 64;
-+        return maxStack;
++        return maxStack; //Craftbukkit
      }
  
      public void markDirty()

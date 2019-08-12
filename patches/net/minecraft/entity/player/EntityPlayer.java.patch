@@ -1,14 +1,5 @@
 --- ../src-base/minecraft/net/minecraft/entity/player/EntityPlayer.java
 +++ ../src-work/minecraft/net/minecraft/entity/player/EntityPlayer.java
-@@ -109,7 +109,7 @@
-     protected static final DataParameter<NBTTagCompound> LEFT_SHOULDER_ENTITY = EntityDataManager.<NBTTagCompound>createKey(EntityPlayer.class, DataSerializers.COMPOUND_TAG);
-     protected static final DataParameter<NBTTagCompound> RIGHT_SHOULDER_ENTITY = EntityDataManager.<NBTTagCompound>createKey(EntityPlayer.class, DataSerializers.COMPOUND_TAG);
-     public InventoryPlayer inventory = new InventoryPlayer(this);
--    protected InventoryEnderChest enderChest = new InventoryEnderChest();
-+    protected InventoryEnderChest enderChest = new InventoryEnderChest(this); // CraftBukkit - add "this" to constructor ///Lava-test - TODO revert and add a field and st uff in constructor
-     public Container inventoryContainer;
-     public Container openContainer;
-     protected FoodStats foodStats = new FoodStats();
 @@ -123,9 +123,9 @@
      public double chasingPosX;
      public double chasingPosY;
@@ -34,15 +25,16 @@
      protected CooldownTracker createCooldownTracker()
      {
          return new CooldownTracker();
-@@ -162,6 +168,7 @@
+@@ -162,6 +168,8 @@
          BlockPos blockpos = worldIn.getSpawnPoint();
          this.setLocationAndAngles((double)blockpos.getX() + 0.5D, (double)(blockpos.getY() + 1), (double)blockpos.getZ() + 0.5D, 0.0F, 0.0F);
          this.unused180 = 180.0F;
 +        this.foodStats.player = this; //Lava - temporal workaround until AppleCore issue won't be finally resolved
++        this.enderChest.owner = this; //Lava-test - moved EnderChest's owner declaration here
      }
  
      protected void applyEntityAttributes()
-@@ -408,7 +415,7 @@
+@@ -408,7 +416,7 @@
          return SoundCategory.PLAYERS;
      }
  
@@ -51,7 +43,7 @@
      {
          return 20;
      }
-@@ -499,7 +506,10 @@
+@@ -499,7 +507,10 @@
          {
              if (this.getHealth() < this.getMaxHealth() && this.ticksExisted % 20 == 0)
              {
@@ -63,7 +55,7 @@
              }
  
              if (this.foodStats.needFood() && this.ticksExisted % 10 == 0)
-@@ -528,6 +538,7 @@
+@@ -528,6 +539,7 @@
          this.setAIMoveSpeed((float)iattributeinstance.getAttributeValue());
          float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
          float f1 = (float)(Math.atan(-this.motionY * 0.20000000298023224D) * 15.0D);
@@ -71,7 +63,7 @@
  
          if (f > 0.1F)
          {
-@@ -893,6 +904,13 @@
+@@ -893,6 +905,13 @@
              this.wakeUpPlayer(true, true, false);
          }
  
@@ -85,7 +77,7 @@
          if (compound.hasKey("SpawnX", 99) && compound.hasKey("SpawnY", 99) && compound.hasKey("SpawnZ", 99))
          {
              this.spawnPos = new BlockPos(compound.getInteger("SpawnX"), compound.getInteger("SpawnY"), compound.getInteger("SpawnZ"));
-@@ -987,6 +1005,7 @@
+@@ -987,6 +1006,7 @@
          {
              compound.setTag("ShoulderEntityRight", this.getRightShoulderEntity());
          }
@@ -93,7 +85,7 @@
      }
  
      public boolean attackEntityFrom(DamageSource source, float amount)
-@@ -1063,6 +1082,21 @@
+@@ -1063,6 +1083,21 @@
          {
              return !team.isSameTeam(team1) ? true : team.getAllowFriendlyFire();
          }
@@ -115,7 +107,7 @@
      }
  
      protected void damageArmor(float damage)
-@@ -1317,8 +1351,17 @@
+@@ -1317,8 +1352,17 @@
  
                          if (j > 0 && !targetEntity.isBurning())
                          {
@@ -135,7 +127,7 @@
                          }
                      }
  
-@@ -1355,6 +1398,10 @@
+@@ -1355,6 +1399,10 @@
                                  {
                                      entitylivingbase.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                                      entitylivingbase.attackEntityFrom(DamageSource.causePlayerDamage(this), f3);
@@ -146,7 +138,7 @@
                                  }
                              }
  
-@@ -1364,11 +1411,36 @@
+@@ -1364,11 +1412,36 @@
  
                          if (targetEntity instanceof EntityPlayerMP && targetEntity.velocityChanged)
                          {
@@ -185,7 +177,7 @@
                          }
  
                          if (flag2)
-@@ -1434,7 +1506,15 @@
+@@ -1434,7 +1507,15 @@
  
                              if (j > 0)
                              {
@@ -202,7 +194,7 @@
                              }
  
                              if (this.world instanceof WorldServer && f5 > 2.0F)
-@@ -1454,6 +1534,11 @@
+@@ -1454,6 +1535,11 @@
                          {
                              targetEntity.extinguish();
                          }
@@ -214,7 +206,7 @@
                      }
                  }
              }
-@@ -1572,6 +1657,20 @@
+@@ -1572,6 +1658,20 @@
              this.dismountRidingEntity();
          }
  
@@ -235,7 +227,7 @@
          this.spawnShoulderEntities();
          this.setSize(0.2F, 0.2F);
  
-@@ -1651,6 +1750,23 @@
+@@ -1651,6 +1751,23 @@
              this.world.updateAllPlayersSleepingFlag();
          }
  
@@ -259,7 +251,7 @@
          this.sleepTimer = immediately ? 0 : 100;
  
          if (setSpawn)
-@@ -1757,11 +1873,13 @@
+@@ -1757,11 +1874,13 @@
          {
              this.spawnPos = pos;
              this.spawnForced = forced;
@@ -273,7 +265,7 @@
          }
      }
  
-@@ -1820,7 +1938,12 @@
+@@ -1820,7 +1939,12 @@
              this.motionY = d3 * 0.6D;
              this.jumpMovementFactor = f;
              this.fallDistance = 0.0F;
@@ -287,7 +279,7 @@
          }
          else
          {
-@@ -2225,10 +2348,18 @@
+@@ -2225,10 +2349,18 @@
  
      protected void spawnShoulderEntities()
      {
@@ -310,7 +302,7 @@
      }
  
      private void spawnShoulderEntity(@Nullable NBTTagCompound p_192026_1_)
-@@ -2247,6 +2378,22 @@
+@@ -2247,6 +2379,22 @@
          }
      }
  
@@ -333,7 +325,7 @@
      @SideOnly(Side.CLIENT)
      public boolean isInvisibleToPlayer(EntityPlayer player)
      {
-@@ -2481,7 +2628,7 @@
+@@ -2481,7 +2629,7 @@
          return (NBTTagCompound)this.dataManager.get(LEFT_SHOULDER_ENTITY);
      }
  
@@ -342,7 +334,7 @@
      {
          this.dataManager.set(LEFT_SHOULDER_ENTITY, tag);
      }
-@@ -2491,7 +2638,7 @@
+@@ -2491,7 +2639,7 @@
          return (NBTTagCompound)this.dataManager.get(RIGHT_SHOULDER_ENTITY);
      }
  
@@ -351,7 +343,7 @@
      {
          this.dataManager.set(RIGHT_SHOULDER_ENTITY, tag);
      }
-@@ -2763,4 +2910,10 @@
+@@ -2763,4 +2911,10 @@
          OTHER_PROBLEM,
          NOT_SAFE;
      }

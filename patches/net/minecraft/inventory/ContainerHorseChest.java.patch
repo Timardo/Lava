@@ -1,34 +1,22 @@
 --- ../src-base/minecraft/net/minecraft/inventory/ContainerHorseChest.java
 +++ ../src-work/minecraft/net/minecraft/inventory/ContainerHorseChest.java
-@@ -1,14 +1,19 @@
- package net.minecraft.inventory;
- 
-+import net.minecraft.entity.passive.AbstractHorse;
-+import net.minecraft.entity.passive.EntityAnimal;
- import net.minecraft.util.text.ITextComponent;
- import net.minecraftforge.fml.relauncher.Side;
- import net.minecraftforge.fml.relauncher.SideOnly;
+@@ -6,6 +6,19 @@
  
  public class ContainerHorseChest extends InventoryBasic
  {
--    public ContainerHorseChest(String inventoryTitle, int slotCount)
-+    private EntityAnimal entityAnimal;
++    //Craftbukkit start - field, method and constructor ///Lava-test - keep old constructor for compatibility
++    private net.minecraft.entity.passive.EntityAnimal entityAnimal;
 +
-+    public ContainerHorseChest(String inventoryTitle, int slotCount, AbstractHorse owner)
-     {
--        super(inventoryTitle, false, slotCount);
++    public ContainerHorseChest(String inventoryTitle, int slotCount, net.minecraft.entity.passive.AbstractHorse owner) {
 +        super(inventoryTitle, false, slotCount, (org.bukkit.entity.AbstractHorse) owner.getBukkitEntity());
 +        this.entityAnimal = owner;
-     }
- 
-     @SideOnly(Side.CLIENT)
-@@ -16,4 +21,9 @@
-     {
-         super(inventoryTitle, slotCount);
-     }
++    }
 +
-+    public EntityAnimal getAnimal()
-+    {
++    public net.minecraft.entity.passive.EntityAnimal getAnimal() {
 +        return this.entityAnimal;
 +    }
- }
++    //Craftbukkit end
++
+     public ContainerHorseChest(String inventoryTitle, int slotCount)
+     {
+         super(inventoryTitle, false, slotCount);

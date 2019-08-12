@@ -1,38 +1,42 @@
 --- ../src-base/minecraft/net/minecraft/inventory/InventoryEnderChest.java
 +++ ../src-work/minecraft/net/minecraft/inventory/InventoryEnderChest.java
-@@ -5,14 +5,19 @@
- import net.minecraft.nbt.NBTTagCompound;
- import net.minecraft.nbt.NBTTagList;
- import net.minecraft.tileentity.TileEntityEnderChest;
-+import org.bukkit.Location;
-+import org.bukkit.inventory.InventoryHolder;
- 
- public class InventoryEnderChest extends InventoryBasic
+@@ -10,11 +10,21 @@
  {
      private TileEntityEnderChest associatedChest;
  
 -    public InventoryEnderChest()
-+    private final EntityPlayer owner;
+-    {
++    //Craftbukkit start
++    public EntityPlayer owner; //Lava-test - private -> public -final
 +
-+    public InventoryEnderChest(EntityPlayer owner)
-     {
++    public InventoryEnderChest(EntityPlayer owner) {
          super("container.enderchest", false, 27);
 +        this.owner = owner;
      }
++    //Craftbukkit end
  
++    public InventoryEnderChest(){
++        super("container.enderchest", false, 27);
++        this.owner = null; //Craftbukkit
++    }
++
++
      public void setChestTileEntity(TileEntityEnderChest chestTileEntity)
-@@ -84,4 +89,14 @@
+     {
+         this.associatedChest = chestTileEntity;
+@@ -84,4 +94,15 @@
          super.closeInventory(player);
          this.associatedChest = null;
      }
 +
-+    public InventoryHolder getBukkitOwner() {
++    //Craftbukkit methods
++    public org.bukkit.inventory.InventoryHolder getBukkitOwner() {
 +        return owner.getBukkitEntity();
 +    }
 +
 +    @Override
-+    public Location getLocation() {
-+        return new Location(this.associatedChest.getWorld().getWorld(), this.associatedChest.getPos().getX(), this.associatedChest.getPos().getY(), this.associatedChest.getPos().getZ());
++    public org.bukkit.Location getLocation() {
++        return new org.bukkit.Location(this.associatedChest.getWorld().getWorld(), this.associatedChest.getPos().getX(), this.associatedChest.getPos().getY(), this.associatedChest.getPos().getZ());
 +    }
 +
  }

@@ -1,50 +1,30 @@
 --- ../src-base/minecraft/net/minecraft/inventory/InventoryMerchant.java
 +++ ../src-work/minecraft/net/minecraft/inventory/InventoryMerchant.java
-@@ -1,6 +1,7 @@
- package net.minecraft.inventory;
- 
- import net.minecraft.entity.IMerchant;
-+import net.minecraft.entity.passive.EntityVillager;
- import net.minecraft.entity.player.EntityPlayer;
- import net.minecraft.item.ItemStack;
- import net.minecraft.util.NonNullList;
-@@ -9,15 +10,54 @@
- import net.minecraft.util.text.TextComponentTranslation;
- import net.minecraft.village.MerchantRecipe;
- import net.minecraft.village.MerchantRecipeList;
-+import org.bukkit.Location;
-+import org.bukkit.craftbukkit.entity.CraftHumanEntity;
-+import org.bukkit.craftbukkit.entity.CraftVillager;
- 
-+import java.util.List;
-+import org.bukkit.entity.HumanEntity;
-+
- public class InventoryMerchant implements IInventory
- {
-     private final IMerchant merchant;
+@@ -16,8 +16,43 @@
      private final NonNullList<ItemStack> slots = NonNullList.<ItemStack>withSize(3, ItemStack.EMPTY);
      private final EntityPlayer player;
      private MerchantRecipe currentRecipe;
 -    private int currentRecipeIndex;
-+    public int currentRecipeIndex;
++    public int currentRecipeIndex; //Craftbukkit - private -> public
  
++    //Craftbukkit start - field, methods..
 +    private int maxStack = MAX_STACK;
 +
-+    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    public java.util.List<org.bukkit.entity.HumanEntity> transaction = new java.util.ArrayList<org.bukkit.entity.HumanEntity>();
 +
-+    public void onOpen(CraftHumanEntity who) {
++    public void onOpen(org.bukkit.craftbukkit.entity.CraftHumanEntity who) {
 +        transaction.add(who);
 +    }
 +
-+    public void onClose(CraftHumanEntity who) {
++    public void onClose(org.bukkit.craftbukkit.entity.CraftHumanEntity who) {
 +        transaction.remove(who);
 +    }
 +
-+    public List<HumanEntity> getViewers() {
++    public java.util.List<org.bukkit.entity.HumanEntity> getViewers() {
 +        return transaction;
 +    }
 +
-+    public List<ItemStack> getContents() {
++    public java.util.List<ItemStack> getContents() {
 +        return this.slots;
 +    }
 +
@@ -53,32 +33,24 @@
 +    }
 +
 +    public org.bukkit.inventory.InventoryHolder getOwner() {
-+        return (merchant instanceof EntityVillager) ? (CraftVillager) ((EntityVillager) this.merchant).getBukkitEntity() : null;
++        return (merchant instanceof net.minecraft.entity.passive.EntityVillager) ? (org.bukkit.craftbukkit.entity.CraftVillager) ((net.minecraft.entity.passive.EntityVillager) this.merchant).getBukkitEntity() : null;
 +    }
 +
 +    @Override
-+    public Location getLocation() {
-+        return (merchant instanceof EntityVillager) ? ((EntityVillager) this.merchant).getBukkitEntity().getLocation() : null;
++    public org.bukkit.Location getLocation() {
++        return (merchant instanceof net.minecraft.entity.passive.EntityVillager) ? ((net.minecraft.entity.passive.EntityVillager) this.merchant).getBukkitEntity().getLocation() : null;
 +    }
++    //Craftbukkit end
 +
      public InventoryMerchant(EntityPlayer thePlayerIn, IMerchant theMerchantIn)
      {
          this.player = thePlayerIn;
-@@ -110,7 +150,7 @@
+@@ -110,7 +145,7 @@
  
      public int getInventoryStackLimit()
      {
 -        return 64;
-+        return maxStack;
++        return maxStack; //Craftbukkit - 64 -> maxStack
      }
  
      public boolean isUsableByPlayer(EntityPlayer player)
-@@ -218,4 +258,8 @@
-     {
-         this.slots.clear();
-     }
-+
-+    public EntityPlayer getPlayer() {
-+        return player;
-+    }
- }

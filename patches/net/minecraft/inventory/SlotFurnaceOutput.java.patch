@@ -1,37 +1,30 @@
 --- ../src-base/minecraft/net/minecraft/inventory/SlotFurnaceOutput.java
 +++ ../src-work/minecraft/net/minecraft/inventory/SlotFurnaceOutput.java
-@@ -4,7 +4,11 @@
- import net.minecraft.entity.player.EntityPlayer;
- import net.minecraft.item.ItemStack;
- import net.minecraft.item.crafting.FurnaceRecipes;
-+import net.minecraft.tileentity.TileEntityFurnace;
- import net.minecraft.util.math.MathHelper;
-+import org.bukkit.entity.ExperienceOrb;
-+import org.bukkit.entity.Player;
-+import org.bukkit.event.inventory.FurnaceExtractEvent;
- 
- public class SlotFurnaceOutput extends Slot
- {
-@@ -70,11 +74,21 @@
+@@ -70,11 +70,26 @@
                  i = j;
              }
  
-+            Player player = (Player) this.player.getBukkitEntity();
-+            TileEntityFurnace furnace = ((TileEntityFurnace) this.inventory);
++            //Craftbukkit start - event
++            org.bukkit.entity.Player player = (org.bukkit.entity.Player) this.player.getBukkitEntity();
++            net.minecraft.tileentity.TileEntityFurnace furnace = ((net.minecraft.tileentity.TileEntityFurnace) this.inventory);
 +            org.bukkit.block.Block block = this.player.world.getWorld().getBlockAt(furnace.getPos().getX(), furnace.getPos().getY(), furnace.getPos().getZ());
 +
 +            if (removeCount != 0) {
-+                FurnaceExtractEvent event = new FurnaceExtractEvent(player, block, org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(stack.getItem()), removeCount, i);
++                org.bukkit.event.inventory.FurnaceExtractEvent event = new org.bukkit.event.inventory.FurnaceExtractEvent(player, block, org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(stack.getItem()), removeCount, i);
 +                this.player.world.getServer().getPluginManager().callEvent(event);
 +                i = event.getExpToDrop();
 +            }
++            //Craftbukkit end
 +
              while (i > 0)
              {
                  int k = EntityXPOrb.getXPSplit(i);
                  i -= k;
 -                this.player.world.spawnEntity(new EntityXPOrb(this.player.world, this.player.posX, this.player.posY + 0.5D, this.player.posZ + 0.5D, k));
-+                this.player.world.spawnEntity(new EntityXPOrb(this.player.world, this.player.posX, this.player.posY + 0.5D, this.player.posZ + 0.5D, k, ExperienceOrb.SpawnReason.FURNACE, this.player));
++                //Craftbukkit start - add spawn reason and trigger entity
++                //this.player.world.spawnEntity(new EntityXPOrb(this.player.world, this.player.posX, this.player.posY + 0.5D, this.player.posZ + 0.5D, k));
++                this.player.world.spawnEntity(new EntityXPOrb(this.player.world, this.player.posX, this.player.posY + 0.5D, this.player.posZ + 0.5D, k, org.bukkit.entity.ExperienceOrb.SpawnReason.FURNACE, this.player));
++                //Craftbukkit end
              }
          }
  

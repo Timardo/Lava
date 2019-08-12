@@ -69,9 +69,10 @@
      {
          super(worldIn);
          this.applyEntityAttributes();
+-        this.setHealth(this.getMaxHealth());
 +        // CraftBukkit start - setHealth(getMaxHealth()) inlined and simplified to skip the instanceof check for EntityPlayer, as getBukkitEntity() is not initialized in constructor
-         this.setHealth(this.getMaxHealth());
-+        //this.dataManager.set(EntityLiving.HEALTH, (float) this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue()); ///Lava-test - revert and check TODO
++        //this.setHealth(this.getMaxHealth());
++        this.dataManager.set(EntityLiving.HEALTH, (float) this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue()); ///Lava-test - reverting causes bad packet and NPE TODO find out why
 +        //Craftbukkit end
          this.preventEntitySpawning = true;
          this.randomUnused1 = (float)((Math.random() + 1.0D) * 0.009999999776482582D);
