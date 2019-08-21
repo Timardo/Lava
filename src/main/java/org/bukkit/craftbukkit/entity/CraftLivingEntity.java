@@ -358,11 +358,19 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     public void setCanPickupItems(boolean pickup) {
-        getHandle().thisisatest = pickup;
+        //Lava-test - do not move the field from one class to another, it causes issues with mods
+        if (getHandle() instanceof EntityLivingBase && !(getHandle() instanceof EntityLiving))
+            getHandle().canPickUpLootCB = pickup;
+        else if (getHandle() instanceof EntityLiving)
+            ((EntityLiving)getHandle()).setCanPickUpLoot(pickup);
     }
 
     public boolean getCanPickupItems() {
-        return getHandle().thisisatest;
+        if (getHandle() instanceof EntityLivingBase && !(getHandle() instanceof EntityLiving))
+            return getHandle().canPickUpLootCB;
+        else if (getHandle() instanceof EntityLiving)
+            return ((EntityLiving)getHandle()).canPickUpLoot();
+        return true; //default to true, shouldn't ever happen though
     }
 
     @Override

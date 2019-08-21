@@ -100,7 +100,7 @@
      /**
       * Used in the getEntitiesWithinAABB functions to expand the search area for entities.
       * Modders should change this variable to a higher value if it is less then the radius
-@@ -94,36 +100,80 @@
+@@ -94,36 +100,79 @@
      public float thunderingStrength;
      private int lastLightningBolt;
      public final Random rand = new Random();
@@ -148,7 +148,7 @@
 +
 +    // TODO: Should we use Forge capturing instead of this?
 +    public boolean captureBlockStates = false, captureTreeGeneration = false;
-+    public ArrayList<BlockState> capturedBlockStates = new ArrayList<BlockState>() {
++    /*public ArrayList<BlockState> capturedBlockStates = new ArrayList<BlockState>() {
 +        @Override
 +        public boolean add(BlockState blockState) {
 +            Iterator<BlockState> blockStateIterator = this.iterator();
@@ -161,8 +161,7 @@
 +
 +            return super.add(blockState);
 +        }
-+    };
-+    //public List<EntityItem> captureDrops; Lava-test - don't use this, forge has it's own
++    };*/
 +    public long ticksPerAnimalSpawns, ticksPerMonsterSpawns;
 +    public boolean populating;
 +    private int tickPosition;
@@ -190,7 +189,7 @@
          this.eventListeners = Lists.newArrayList(this.pathListener);
          this.calendar = Calendar.getInstance();
          this.worldScoreboard = new Scoreboard();
-@@ -136,203 +186,246 @@
+@@ -136,203 +185,229 @@
          this.provider = providerIn;
          this.isRemote = client;
          this.worldBorder = providerIn.createWorldBorder();
@@ -484,34 +483,17 @@
 -    {
 -        if (this.isOutsideBuildHeight(pos))
 -        {
--            return false;
 +    public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
-+        // CraftBukkit start - tree generation
-+        if (this.captureTreeGeneration) {
-+            net.minecraftforge.common.util.BlockSnapshot blocksnapshot = null;
-+
-+            for (net.minecraftforge.common.util.BlockSnapshot previous : this.capturedBlockSnapshots) {
-+                if (previous.getPos().equals(pos)) {
-+                    blocksnapshot = previous;
-+                    break;
-+                }
-+            }
-+            if (blocksnapshot != null) {
-+                this.capturedBlockSnapshots.remove(blocksnapshot);
-+            }
-+            this.capturedBlockSnapshots.add(new net.minecraftforge.common.util.BlockSnapshot(this, pos, newState, flags));
-+            return true;
-         }
++        if (this.isOutsideBuildHeight(pos)) {
+             return false;
+-        }
 -        else if (!this.isRemote && this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES)
 -        {
-+        // CraftBukkit end
-+        if (this.isOutsideBuildHeight(pos)) {
++        } else if (!this.isRemote && this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
              return false;
 -        }
 -        else
 -        {
-+        } else if (!this.isRemote && this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
-+            return false;
 +        } else {
              Chunk chunk = this.getChunkFromBlockCoords(pos);
  
@@ -519,11 +501,11 @@
              net.minecraftforge.common.util.BlockSnapshot blockSnapshot = null;
 -            if (this.captureBlockSnapshots && !this.isRemote)
 -            {
-+            if (this.captureBlockSnapshots && !this.isRemote) {
++            if ((this.captureBlockSnapshots && !this.isRemote) || this.captureTreeGeneration) { //Lava-test - also add snapshots if we are capturing the tree gen
                  blockSnapshot = net.minecraftforge.common.util.BlockSnapshot.getBlockSnapshot(this, pos, flags);
                  this.capturedBlockSnapshots.add(blockSnapshot);
              }
-@@ -342,15 +435,11 @@
+@@ -342,15 +417,11 @@
  
              IBlockState iblockstate = chunk.setBlockState(pos, newState);
  
@@ -542,7 +524,7 @@
                      this.profiler.startSection("checkLight");
                      this.checkLight(pos);
                      this.profiler.endSection();
-@@ -366,53 +455,41 @@
+@@ -366,53 +437,41 @@
      }
  
      // Split off from original setBlockState(BlockPos, IBlockState, int) method in order to directly send client and physic updates
@@ -606,7 +588,7 @@
                  block.dropBlockAsItem(this, pos, iblockstate, 0);
              }
  
-@@ -420,40 +497,36 @@
+@@ -420,40 +479,36 @@
          }
      }
  
@@ -662,7 +644,7 @@
                  this.checkLightFor(EnumSkyBlock.SKY, new BlockPos(x, j, z));
              }
          }
-@@ -461,21 +534,17 @@
+@@ -461,21 +516,17 @@
          this.markBlockRangeForRenderUpdate(x, y1, z, x, y2, z);
      }
  
@@ -689,7 +671,7 @@
          this.observedNeighborChanged(pos.west(), blockType, pos);
          this.observedNeighborChanged(pos.east(), blockType, pos);
          this.observedNeighborChanged(pos.down(), blockType, pos);
-@@ -484,9 +553,8 @@
+@@ -484,9 +535,8 @@
          this.observedNeighborChanged(pos.south(), blockType, pos);
      }
  
@@ -701,7 +683,7 @@
              return;
  
          this.neighborChanged(pos.west(), blockType, pos);
-@@ -496,74 +564,67 @@
+@@ -496,74 +546,67 @@
          this.neighborChanged(pos.north(), blockType, pos);
          this.neighborChanged(pos.south(), blockType, pos);
  
@@ -804,7 +786,7 @@
                              return "ID #" + Block.getIdFromBlock(blockIn);
                          }
                      }
-@@ -574,32 +635,21 @@
+@@ -574,32 +617,21 @@
          }
      }
  
@@ -846,7 +828,7 @@
                                  return "ID #" + Block.getIdFromBlock(p_190529_2_);
                              }
                          }
-@@ -611,38 +661,27 @@
+@@ -611,38 +643,27 @@
          }
      }
  
@@ -894,7 +876,7 @@
                          return false;
                      }
                  }
-@@ -652,16 +691,11 @@
+@@ -652,16 +673,11 @@
          }
      }
  
@@ -915,7 +897,7 @@
                  pos = new BlockPos(pos.getX(), 255, pos.getZ());
              }
  
-@@ -669,88 +703,65 @@
+@@ -669,88 +685,65 @@
          }
      }
  
@@ -1022,7 +1004,7 @@
              i = this.getSeaLevel() + 1;
          }
  
-@@ -758,114 +769,81 @@
+@@ -758,114 +751,81 @@
      }
  
      @Deprecated
@@ -1162,7 +1144,7 @@
                  Chunk chunk = this.getChunkFromBlockCoords(pos);
                  chunk.setLightFor(type, pos, lightValue);
                  this.notifyLightSet(pos);
-@@ -873,70 +851,64 @@
+@@ -873,70 +833,64 @@
          }
      }
  
@@ -1257,7 +1239,7 @@
                  int i = MathHelper.floor(vec32.x);
                  int j = MathHelper.floor(vec32.y);
                  int k = MathHelper.floor(vec32.z);
-@@ -947,12 +919,10 @@
+@@ -947,12 +901,10 @@
                  IBlockState iblockstate = this.getBlockState(blockpos);
                  Block block = iblockstate.getBlock();
  
@@ -1272,7 +1254,7 @@
                          return raytraceresult;
                      }
                  }
-@@ -960,15 +930,12 @@
+@@ -960,15 +912,12 @@
                  RayTraceResult raytraceresult2 = null;
                  int k1 = 200;
  
@@ -1291,7 +1273,7 @@
                          return returnLastUncollidableBlock ? raytraceresult2 : null;
                      }
  
-@@ -979,42 +946,27 @@
+@@ -979,42 +928,27 @@
                      double d1 = 999.0D;
                      double d2 = 999.0D;
  
@@ -1349,7 +1331,7 @@
                          flag1 = false;
                      }
  
-@@ -1025,50 +977,39 @@
+@@ -1025,50 +959,39 @@
                      double d7 = vec32.y - vec31.y;
                      double d8 = vec32.z - vec31.z;
  
@@ -1409,7 +1391,7 @@
                          enumfacing = k > j1 ? EnumFacing.NORTH : EnumFacing.SOUTH;
                          vec31 = new Vec3d(vec31.x + d6 * d5, vec31.y + d7 * d5, d2);
                      }
-@@ -1080,44 +1021,33 @@
+@@ -1080,44 +1003,33 @@
                      IBlockState iblockstate1 = this.getBlockState(blockpos);
                      Block block1 = iblockstate1.getBlock();
  
@@ -1463,7 +1445,7 @@
          net.minecraftforge.event.entity.PlaySoundAtEntityEvent event = net.minecraftforge.event.ForgeEventFactory.onPlaySoundAtEntity(player, soundIn, category, volume, pitch);
          if (event.isCanceled() || event.getSound() == null) return;
          soundIn = event.getSound();
-@@ -1125,140 +1055,152 @@
+@@ -1125,140 +1037,152 @@
          volume = event.getVolume();
          pitch = event.getPitch();
  
@@ -1684,7 +1666,7 @@
              this.playerEntities.remove(entityIn);
              this.updateAllPlayersSleepingFlag();
          }
-@@ -1266,22 +1208,28 @@
+@@ -1266,22 +1190,28 @@
          int i = entityIn.chunkCoordX;
          int j = entityIn.chunkCoordZ;
  
@@ -1720,7 +1702,7 @@
          int i = MathHelper.floor(aabb.minX) - 1;
          int j = MathHelper.ceil(aabb.maxX) + 1;
          int k = MathHelper.floor(aabb.minY) - 1;
-@@ -1294,51 +1242,38 @@
+@@ -1294,51 +1224,38 @@
          IBlockState iblockstate = Blocks.STONE.getDefaultState();
          BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
  
@@ -1786,7 +1768,7 @@
                                      boolean flag5 = true;
                                      return flag5;
                                  }
-@@ -1347,41 +1282,33 @@
+@@ -1347,41 +1264,33 @@
                      }
                  }
              }
@@ -1835,7 +1817,7 @@
                          list.add(axisalignedbb);
                      }
                  }
-@@ -1391,27 +1318,22 @@
+@@ -1391,27 +1300,22 @@
          return list;
      }
  
@@ -1867,7 +1849,7 @@
              --d0;
              --d1;
              ++d2;
-@@ -1421,16 +1343,14 @@
+@@ -1421,16 +1325,14 @@
          return p_191503_1_.posX > d0 && p_191503_1_.posX < d2 && p_191503_1_.posZ > d1 && p_191503_1_.posZ < d3;
      }
  
@@ -1888,7 +1870,7 @@
      }
  
      /**
-@@ -1439,63 +1359,57 @@
+@@ -1439,63 +1341,57 @@
       * Highly recommended for sunlight detection like solar panel.
       *
       * @return The current brightness factor
@@ -1969,7 +1951,7 @@
              float f7 = (f3 * 0.3F + f4 * 0.59F + f5 * 0.11F) * 0.6F;
              float f8 = 1.0F - f6 * 0.75F;
              f3 = f3 * f8 + f7 * (1.0F - f8);
-@@ -1505,8 +1419,7 @@
+@@ -1505,8 +1401,7 @@
  
          float f10 = this.getThunderStrength(partialTicks);
  
@@ -1979,7 +1961,7 @@
              float f11 = (f3 * 0.3F + f4 * 0.59F + f5 * 0.11F) * 0.2F;
              float f9 = 1.0F - f10 * 0.75F;
              f3 = f3 * f9 + f11 * (1.0F - f9);
-@@ -1514,12 +1427,10 @@
+@@ -1514,12 +1409,10 @@
              f5 = f5 * f9 + f11 * (1.0F - f9);
          }
  
@@ -1995,7 +1977,7 @@
                  f12 = 1.0F;
              }
  
-@@ -1529,55 +1440,47 @@
+@@ -1529,55 +1422,47 @@
              f5 = f5 * (1.0F - f12) + 1.0F * f12;
          }
  
@@ -2062,7 +2044,7 @@
              float f6 = (f2 * 0.3F + f3 * 0.59F + f4 * 0.11F) * 0.6F;
              float f7 = 1.0F - f5 * 0.95F;
              f2 = f2 * f7 + f6 * (1.0F - f7);
-@@ -1590,8 +1493,7 @@
+@@ -1590,8 +1475,7 @@
          f4 = f4 * (f1 * 0.85F + 0.15F);
          float f9 = this.getThunderStrength(partialTicks);
  
@@ -2072,7 +2054,7 @@
              float f10 = (f2 * 0.3F + f3 * 0.59F + f4 * 0.11F) * 0.2F;
              float f8 = 1.0F - f9 * 0.95F;
              f2 = f2 * f8 + f10 * (1.0F - f8);
-@@ -1599,34 +1501,29 @@
+@@ -1599,34 +1483,29 @@
              f4 = f4 * f8 + f10 * (1.0F - f8);
          }
  
@@ -2113,7 +2095,7 @@
                  break;
              }
          }
-@@ -1635,77 +1532,64 @@
+@@ -1635,77 +1514,64 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -2214,7 +2196,7 @@
                  this.weatherEffects.remove(i--);
              }
          }
-@@ -1713,20 +1597,17 @@
+@@ -1713,20 +1579,17 @@
          this.profiler.endStartSection("remove");
          this.loadedEntityList.removeAll(this.unloadedEntityList);
  
@@ -2238,7 +2220,7 @@
              this.onEntityRemoved(this.unloadedEntityList.get(l));
          }
  
-@@ -1734,15 +1615,14 @@
+@@ -1734,15 +1597,14 @@
          this.tickPlayers();
          this.profiler.endStartSection("regular");
  
@@ -2260,7 +2242,7 @@
                      continue;
                  }
  
-@@ -1751,43 +1631,35 @@
+@@ -1751,43 +1613,35 @@
  
              this.profiler.startSection("tick");
  
@@ -2313,7 +2295,7 @@
                  this.onEntityRemoved(entity2);
              }
  
-@@ -1798,11 +1670,9 @@
+@@ -1798,11 +1652,9 @@
  
          this.processingLoadedTiles = true; //FML Move above remove to prevent CMEs
  
@@ -2328,7 +2310,7 @@
              }
  
              // forge: faster "contains" makes this removal much more efficient
-@@ -1815,51 +1685,42 @@
+@@ -1815,51 +1667,42 @@
  
          Iterator<TileEntity> iterator = this.tickableTileEntities.iterator();
  
@@ -2391,7 +2373,7 @@
                      //Forge: Bugfix: If we set the tile entity it immediately sets it in the chunk, so we could be desyned
                      Chunk chunk = this.getChunkFromBlockCoords(tileentity.getPos());
                      if (chunk.getTileEntity(tileentity.getPos(), net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK) == tileentity)
-@@ -1871,25 +1732,28 @@
+@@ -1871,25 +1714,28 @@
          this.processingLoadedTiles = false;
          this.profiler.endStartSection("pendingBlockEntities");
  
@@ -2430,7 +2412,7 @@
                      }
                  }
              }
-@@ -1901,12 +1765,10 @@
+@@ -1901,12 +1747,10 @@
          this.profiler.endSection();
      }
  
@@ -2445,7 +2427,7 @@
          // Forge - set the world early as vanilla doesn't set it until next tick
          if (tile.getWorld() != this) tile.setWorld(this);
          // Forge: wait to add new TE if we're currently processing existing ones
-@@ -1914,14 +1776,12 @@
+@@ -1914,14 +1758,12 @@
  
          boolean flag = this.loadedTileEntityList.add(tile);
  
@@ -2462,7 +2444,7 @@
              BlockPos blockpos1 = tile.getPos();
              IBlockState iblockstate1 = this.getBlockState(blockpos1);
              this.notifyBlockUpdate(blockpos1, iblockstate1, iblockstate1, 2);
-@@ -1930,35 +1790,26 @@
+@@ -1930,35 +1772,26 @@
          return flag;
      }
  
@@ -2506,7 +2488,7 @@
              int j2 = MathHelper.floor(entityIn.posX);
              int k2 = MathHelper.floor(entityIn.posZ);
  
-@@ -1967,8 +1818,7 @@
+@@ -1967,8 +1800,7 @@
              boolean canUpdate = !forceUpdate || this.isAreaLoaded(j2 - range, 0, k2 - range, j2 + range, 0, k2 + range, true);
              if (!canUpdate) canUpdate = net.minecraftforge.event.ForgeEventFactory.canEntityUpdate(entityIn);
  
@@ -2516,7 +2498,7 @@
                  return;
              }
          }
-@@ -1979,45 +1829,37 @@
+@@ -1979,45 +1811,37 @@
          entityIn.prevRotationYaw = entityIn.rotationYaw;
          entityIn.prevRotationPitch = entityIn.rotationPitch;
  
@@ -2573,7 +2555,7 @@
              entityIn.rotationYaw = entityIn.prevRotationYaw;
          }
  
-@@ -2025,52 +1867,39 @@
+@@ -2025,52 +1849,39 @@
          int j3 = MathHelper.floor(entityIn.posY / 16.0D);
          int k3 = MathHelper.floor(entityIn.posZ / 16.0D);
  
@@ -2639,7 +2621,7 @@
              Entity entity4 = list.get(j2);
  
              if (!entity4.isDead && entity4.preventEntitySpawning && entity4 != entityIn && (entityIn == null || !entity4.isRidingSameEntity(entityIn))) // Forge: fix MC-103516
-@@ -2082,8 +1911,7 @@
+@@ -2082,8 +1893,7 @@
          return true;
      }
  
@@ -2649,7 +2631,7 @@
          int j2 = MathHelper.floor(bb.minX);
          int k2 = MathHelper.ceil(bb.maxX);
          int l2 = MathHelper.floor(bb.minY);
-@@ -2092,16 +1920,12 @@
+@@ -2092,16 +1902,12 @@
          int k3 = MathHelper.ceil(bb.maxZ);
          BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
  
@@ -2670,7 +2652,7 @@
                          blockpos$pooledmutableblockpos.release();
                          return true;
                      }
-@@ -2113,8 +1937,7 @@
+@@ -2113,8 +1919,7 @@
          return false;
      }
  
@@ -2680,7 +2662,7 @@
          int j2 = MathHelper.floor(bb.minX);
          int k2 = MathHelper.ceil(bb.maxX);
          int l2 = MathHelper.floor(bb.minY);
-@@ -2123,12 +1946,9 @@
+@@ -2123,12 +1928,9 @@
          int k3 = MathHelper.ceil(bb.maxZ);
          BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
  
@@ -2696,7 +2678,7 @@
                      IBlockState iblockstate1 = this.getBlockState(blockpos$pooledmutableblockpos.setPos(l3, i4, j4));
  
                      Boolean result = iblockstate1.getBlock().isAABBInsideLiquid(this, blockpos$pooledmutableblockpos, bb);
-@@ -2137,8 +1957,7 @@
+@@ -2137,8 +1939,7 @@
                          blockpos$pooledmutableblockpos.release();
                          return true;
                      }
@@ -2706,7 +2688,7 @@
                          blockpos$pooledmutableblockpos.release();
                          return true;
                      }
-@@ -2150,8 +1969,7 @@
+@@ -2150,8 +1951,7 @@
          return false;
      }
  
@@ -2716,7 +2698,7 @@
          int j2 = MathHelper.floor(bb.minX);
          int k2 = MathHelper.ceil(bb.maxX);
          int l2 = MathHelper.floor(bb.minY);
-@@ -2159,25 +1977,18 @@
+@@ -2159,25 +1959,18 @@
          int j3 = MathHelper.floor(bb.minZ);
          int k3 = MathHelper.ceil(bb.maxZ);
  
@@ -2748,7 +2730,7 @@
                              blockpos$pooledmutableblockpos.release();
                              return true;
                          }
-@@ -2191,8 +2002,7 @@
+@@ -2191,8 +1984,7 @@
          return false;
      }
  
@@ -2758,7 +2740,7 @@
          int j2 = MathHelper.floor(bb.minX);
          int k2 = MathHelper.ceil(bb.maxX);
          int l2 = MathHelper.floor(bb.minY);
-@@ -2200,42 +2010,32 @@
+@@ -2200,42 +1992,32 @@
          int j3 = MathHelper.floor(bb.minZ);
          int k3 = MathHelper.ceil(bb.maxZ);
  
@@ -2812,7 +2794,7 @@
                                  flag = true;
                                  vec3d = block.modifyAcceleration(this, blockpos$pooledmutableblockpos, entityIn, vec3d);
                              }
-@@ -2246,8 +2046,7 @@
+@@ -2246,8 +2028,7 @@
  
              blockpos$pooledmutableblockpos.release();
  
@@ -2822,7 +2804,7 @@
                  vec3d = vec3d.normalize();
                  double d1 = 0.014D;
                  entityIn.motionX += vec3d.x * 0.014D;
-@@ -2259,8 +2058,7 @@
+@@ -2259,8 +2040,7 @@
          }
      }
  
@@ -2832,7 +2814,7 @@
          int j2 = MathHelper.floor(bb.minX);
          int k2 = MathHelper.ceil(bb.maxX);
          int l2 = MathHelper.floor(bb.minY);
-@@ -2269,12 +2067,9 @@
+@@ -2269,12 +2049,9 @@
          int k3 = MathHelper.ceil(bb.maxZ);
          BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
  
@@ -2848,7 +2830,7 @@
                      IBlockState iblockstate1 = this.getBlockState(blockpos$pooledmutableblockpos.setPos(l3, i4, j4));
                      Boolean result = iblockstate1.getBlock().isAABBInsideMaterial(this, blockpos$pooledmutableblockpos, bb, materialIn);
                      if (result != null) {
-@@ -2282,8 +2077,7 @@
+@@ -2282,8 +2059,7 @@
                          blockpos$pooledmutableblockpos.release();
                          return true;
                      }
@@ -2858,7 +2840,7 @@
                          blockpos$pooledmutableblockpos.release();
                          return true;
                      }
-@@ -2295,13 +2089,11 @@
+@@ -2295,13 +2071,11 @@
          return false;
      }
  
@@ -2874,7 +2856,7 @@
          Explosion explosion = new Explosion(this, entityIn, x, y, z, strength, isFlaming, isSmoking);
          if (net.minecraftforge.event.ForgeEventFactory.onExplosionStart(this, explosion)) return explosion;
          explosion.doExplosionA();
-@@ -2309,31 +2101,25 @@
+@@ -2309,31 +2083,25 @@
          return explosion;
      }
  
@@ -2915,7 +2897,7 @@
                              ++j2;
                          }
  
-@@ -2342,65 +2128,57 @@
+@@ -2342,65 +2110,57 @@
                  }
              }
  
@@ -3001,7 +2983,7 @@
                  tileentity2 = this.getPendingTileEntityAt(pos);
              }
  
-@@ -2409,14 +2187,11 @@
+@@ -2409,14 +2169,11 @@
      }
  
      @Nullable
@@ -3019,7 +3001,7 @@
                  return tileentity2;
              }
          }
-@@ -2424,35 +2199,36 @@
+@@ -2424,35 +2181,36 @@
          return null;
      }
  
@@ -3071,7 +3053,7 @@
                      Chunk chunk = this.getChunkFromBlockCoords(pos);
                      if (chunk != null) chunk.addTileEntity(pos, tileEntityIn);
                      this.addTileEntity(tileEntityIn);
-@@ -2461,21 +2237,16 @@
+@@ -2461,21 +2219,16 @@
          }
      }
  
@@ -3097,7 +3079,7 @@
                  this.addedTileEntityList.remove(tileentity2);
                  this.loadedTileEntityList.remove(tileentity2);
                  this.tickableTileEntities.remove(tileentity2);
-@@ -2486,98 +2257,75 @@
+@@ -2486,98 +2239,75 @@
          this.updateComparatorOutputLevel(pos, getBlockState(pos).getBlock()); //Notify neighbors of changes
      }
  
@@ -3217,7 +3199,7 @@
                          --j2;
                          this.worldInfo.setCleanWeatherTime(j2);
                          this.worldInfo.setThunderTime(this.worldInfo.isThundering() ? 1 : 2);
-@@ -2586,48 +2334,34 @@
+@@ -2586,48 +2316,34 @@
  
                      int k2 = this.worldInfo.getThunderTime();
  
@@ -3276,7 +3258,7 @@
                              this.worldInfo.setRaining(!this.worldInfo.isRaining());
                          }
                      }
-@@ -2635,91 +2369,78 @@
+@@ -2635,91 +2351,78 @@
  
                  this.prevThunderingStrength = this.thunderingStrength;
  
@@ -3396,7 +3378,7 @@
                          return true;
                      }
                  }
-@@ -2729,37 +2450,27 @@
+@@ -2729,37 +2432,27 @@
          }
      }
  
@@ -3442,7 +3424,7 @@
                      return true;
                  }
              }
-@@ -2768,12 +2479,10 @@
+@@ -2768,12 +2461,10 @@
          }
      }
  
@@ -3457,7 +3439,7 @@
              flag |= this.checkLightFor(EnumSkyBlock.SKY, pos);
          }
  
-@@ -2781,14 +2490,10 @@
+@@ -2781,14 +2472,10 @@
          return flag;
      }
  
@@ -3475,7 +3457,7 @@
              IBlockState iblockstate1 = this.getBlockState(pos);
              int j2 = lightType == EnumSkyBlock.SKY ? 0 : iblockstate1.getBlock().getLightValue(iblockstate1, this, pos);
              int k2 = iblockstate1.getBlock().getLightOpacity(iblockstate1, this, pos);
-@@ -2798,60 +2503,47 @@
+@@ -2798,60 +2485,47 @@
                  k2 = 1;
              }
  
@@ -3551,7 +3533,7 @@
              int updateRange = this.isAreaLoaded(pos, 18, false) ? 17 : 15;
              int j2 = 0;
              int k2 = 0;
-@@ -2862,16 +2554,12 @@
+@@ -2862,16 +2536,12 @@
              int k3 = pos.getY();
              int l3 = pos.getZ();
  
@@ -3571,7 +3553,7 @@
                      int i4 = this.lightUpdateBlockList[j2++];
                      int j4 = (i4 & 63) - 32 + j3;
                      int k4 = (i4 >> 6 & 63) - 32 + k3;
-@@ -2880,22 +2568,18 @@
+@@ -2880,22 +2550,18 @@
                      BlockPos blockpos1 = new BlockPos(j4, k4, l4);
                      int j5 = this.getLightFor(lightType, blockpos1);
  
@@ -3598,7 +3580,7 @@
                                      int j6 = j4 + enumfacing.getFrontOffsetX();
                                      int k6 = k4 + enumfacing.getFrontOffsetY();
                                      int l6 = l4 + enumfacing.getFrontOffsetZ();
-@@ -2904,8 +2588,7 @@
+@@ -2904,8 +2570,7 @@
                                      int i7 = Math.max(1, bs.getBlock().getLightOpacity(bs, this, blockpos$pooledmutableblockpos));
                                      j5 = this.getLightFor(lightType, blockpos$pooledmutableblockpos);
  
@@ -3608,7 +3590,7 @@
                                          this.lightUpdateBlockList[k2++] = j6 - j3 + 32 | k6 - k3 + 32 << 6 | l6 - l3 + 32 << 12 | i5 - i7 << 18;
                                      }
                                  }
-@@ -2922,8 +2605,7 @@
+@@ -2922,8 +2587,7 @@
              this.profiler.endSection();
              this.profiler.startSection("checkedPosition < toCheckCount");
  
@@ -3618,7 +3600,7 @@
                  int j7 = this.lightUpdateBlockList[j2++];
                  int k7 = (j7 & 63) - 32 + j3;
                  int l7 = (j7 >> 6 & 63) - 32 + k3;
-@@ -2932,46 +2614,37 @@
+@@ -2932,46 +2596,37 @@
                  int j8 = this.getLightFor(lightType, blockpos2);
                  int k8 = this.getRawLight(blockpos2, lightType);
  
@@ -3674,7 +3656,7 @@
                                  this.lightUpdateBlockList[k2++] = k7 - j3 + 32 + (l7 - k3 + 32 << 6) + (i8 + 1 - l3 + 32 << 12);
                              }
                          }
-@@ -2984,42 +2657,34 @@
+@@ -2984,42 +2639,34 @@
          }
      }
  
@@ -3725,7 +3707,7 @@
                      this.getChunkFromChunkCoords(j3, k3).getEntitiesWithinAABBForEntity(entityIn, boundingBox, list, predicate);
                  }
              }
-@@ -3028,55 +2693,44 @@
+@@ -3028,55 +2675,44 @@
          return list;
      }
  
@@ -3794,7 +3776,7 @@
                      this.getChunkFromChunkCoords(j3, k3).getEntitiesOfTypeWithinAABB(clazz, aabb, list, filter);
                  }
              }
-@@ -3086,22 +2740,18 @@
+@@ -3086,22 +2722,18 @@
      }
  
      @Nullable
@@ -3821,7 +3803,7 @@
                      t = t1;
                      d0 = d1;
                  }
-@@ -3112,33 +2762,35 @@
+@@ -3112,33 +2744,35 @@
      }
  
      @Nullable
@@ -3871,7 +3853,7 @@
                  ++j2;
              }
          }
-@@ -3146,106 +2798,89 @@
+@@ -3146,106 +2780,89 @@
          return j2;
      }
  
@@ -4016,7 +3998,7 @@
                              j2 = Math.max(j2, this.getStrongPower(pos.east(), EnumFacing.EAST));
                              return j2 >= 15 ? j2 : j2;
                          }
-@@ -3255,60 +2890,42 @@
+@@ -3255,60 +2872,42 @@
          }
      }
  
@@ -4090,7 +4072,7 @@
                  j2 = k2;
              }
          }
-@@ -3317,40 +2934,39 @@
+@@ -3317,40 +2916,39 @@
      }
  
      @Nullable
@@ -4144,7 +4126,7 @@
                      d0 = d1;
                      entityplayer = entityplayer1;
                  }
-@@ -3360,18 +2976,14 @@
+@@ -3360,18 +2958,14 @@
          return entityplayer;
      }
  
@@ -4167,7 +4149,7 @@
                      return true;
                  }
              }
-@@ -3381,58 +2993,48 @@
+@@ -3381,58 +2975,48 @@
      }
  
      @Nullable
@@ -4240,7 +4222,7 @@
                      d0 = d1;
                      entityplayer = entityplayer1;
                  }
-@@ -3443,14 +3045,11 @@
+@@ -3443,14 +3027,11 @@
      }
  
      @Nullable
@@ -4258,7 +4240,7 @@
                  return entityplayer;
              }
          }
-@@ -3459,14 +3058,11 @@
+@@ -3459,14 +3040,11 @@
      }
  
      @Nullable
@@ -4276,7 +4258,7 @@
                  return entityplayer;
              }
          }
-@@ -3475,237 +3071,194 @@
+@@ -3475,237 +3053,194 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -4578,7 +4560,7 @@
              CrashReport crashreport3 = CrashReport.makeCrashReport(throwable3, "Playing level event");
              CrashReportCategory crashreportcategory3 = crashreport3.makeCategory("Level event being played");
              crashreportcategory3.addCrashSection("Block coordinates", CrashReportCategory.getCoordinateInfo(pos));
-@@ -3716,48 +3269,37 @@
+@@ -3716,48 +3251,37 @@
          }
      }
  
@@ -4638,7 +4620,7 @@
              crashreportcategory3.addCrashSectionThrowable("Level Data Unobtainable", throwable3);
          }
  
-@@ -3765,24 +3307,19 @@
+@@ -3765,24 +3289,19 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -4668,7 +4650,7 @@
              this.calendar.setTimeInMillis(MinecraftServer.getCurrentTimeMillis());
          }
  
-@@ -3790,33 +3327,26 @@
+@@ -3790,33 +3309,26 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -4709,7 +4691,7 @@
                          iblockstate1.getBlock().onNeighborChange(this, blockpos1, pos);
                      }
                  }
-@@ -3824,13 +3354,11 @@
+@@ -3824,13 +3336,11 @@
          }
      }
  
@@ -4725,7 +4707,7 @@
              f = this.getCurrentMoonPhaseFactor();
              j2 = this.getChunkFromBlockCoords(pos).getInhabitedTime();
          }
-@@ -3838,77 +3366,68 @@
+@@ -3838,77 +3348,68 @@
          return new DifficultyInstance(this.getDifficulty(), this.getWorldTime(), j2, f);
      }
  
@@ -4820,7 +4802,7 @@
          if (!this.isValid(pos)) return _default;
  
          Chunk chunk = getChunkFromBlockCoords(pos);
-@@ -3921,23 +3440,21 @@
+@@ -3921,23 +3422,21 @@
       *
       * @return
       */
@@ -4848,7 +4830,7 @@
          if (!this.isValid(pos)) return 0;
          return getChunkFromBlockCoords(pos).getBlockLightOpacity(pos);
      }
-@@ -3945,13 +3462,10 @@
+@@ -3945,13 +3444,10 @@
      /**
       * Returns a count of entities that classify themselves as the specified creature type.
       */
@@ -4865,7 +4847,7 @@
                  count++;
              }
          }
-@@ -3959,61 +3473,52 @@
+@@ -3959,61 +3455,52 @@
      }
  
      @Deprecated // remove in 1.13

@@ -1,29 +1,26 @@
 --- ../src-base/minecraft/net/minecraftforge/fml/relauncher/ServerLaunchWrapper.java
 +++ ../src-work/minecraft/net/minecraftforge/fml/relauncher/ServerLaunchWrapper.java
-@@ -19,6 +19,7 @@
- 
- package net.minecraftforge.fml.relauncher;
- 
-+import org.lavapowered.lava.util.AutoLibraryDownloader;
- import java.lang.reflect.Method;
- 
- import org.apache.logging.log4j.LogManager;
-@@ -31,6 +32,9 @@
+@@ -31,6 +31,11 @@
       */
      public static void main(String[] args)
      {
++        //Lava start - download libs
 +        System.out.println("Starting Lava-test implementation. USE AT YOUR OWN RISK!");
-+        AutoLibraryDownloader.downloadMinecraftServer();
-+        AutoLibraryDownloader.downloadServerLibraries();
++        org.lavapowered.lava.util.AutoLibraryDownloader.downloadMinecraftServer();
++        org.lavapowered.lava.util.AutoLibraryDownloader.downloadServerLibraries();
++        //Lava end
          new ServerLaunchWrapper().run(args);
      }
  
-@@ -44,7 +48,7 @@
+@@ -44,7 +49,10 @@
          if (System.getProperty("log4j.configurationFile") == null)
          {
              // Set this early so we don't need to reconfigure later
 -            System.setProperty("log4j.configurationFile", "log4j2_server.xml");
++            //Lava start - set our logging config TODO is this needed?
++            //System.setProperty("log4j.configurationFile", "log4j2_server.xml");
 +            System.setProperty("log4j.configurationFile", "log4j2_lava.xml");
++            //Lava end
          }
          Class<?> launchwrapper = null;
          try

@@ -124,7 +124,7 @@ public final class CraftServer implements Server {
     private final SimplePluginManager pluginManager = new SimplePluginManager(this, commandMap);
     protected final MinecraftServer console;
     protected final DedicatedPlayerList playerList;
-    private final Map<String, World> worlds = new LinkedHashMap<>();
+    public final Map<String, World> worlds = new LinkedHashMap<>();
     private YamlConfiguration configuration;
     private YamlConfiguration commandsConfiguration;
     private final Yaml yaml = new Yaml(new SafeConstructor());
@@ -924,7 +924,7 @@ public final class CraftServer implements Server {
             return false;
         }
 
-        if (save) {
+        /*if (save) { Lava-test - ALWAYS save the world TODO find an example where this is false
             try {
                 handle.saveAllChunks(true, null);
                 handle.flush();
@@ -934,8 +934,8 @@ public final class CraftServer implements Server {
         }
         MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.world.WorldEvent.Unload(handle)); // fire unload event before removing world
         worlds.remove(world.getName().toLowerCase(java.util.Locale.ENGLISH));
-        DimensionManager.setWorld(handle.provider.getDimension(), null, FMLCommonHandler.instance().getMinecraftServerInstance()); // remove world from DimensionManager
-
+        DimensionManager.setWorld(handle.provider.getDimension(), null, FMLCommonHandler.instance().getMinecraftServerInstance()); // remove world from DimensionManager*/
+        DimensionManager.unloadWorld(handle.dimension); //Lava-test - queue for unloading as forge does
         return true;
     }
 
@@ -1046,17 +1046,17 @@ public final class CraftServer implements Server {
 
     @Override
     public void clearRecipes() {
-        CraftingManager.REGISTRY = new RegistryNamespaced<>();
-        FurnaceRecipes.instance().smeltingList.clear();
+        //CraftingManager.REGISTRY = new RegistryNamespaced<>(); NOPE, this is VERY bad, craftbukkit, shame on you
+        //FurnaceRecipes.instance().smeltingList.clear(); Lava-test - only clear CB recipes
         FurnaceRecipes.instance().customRecipes.clear();
         FurnaceRecipes.instance().customExperience.clear();
     }
 
     @Override
     public void resetRecipes() {
-        CraftingManager.REGISTRY = new RegistryNamespaced<>();
-        CraftingManager.init();
-        FurnaceRecipes.instance().smeltingList = new FurnaceRecipes().smeltingList;
+        //CraftingManager.REGISTRY = new RegistryNamespaced<>();
+        //CraftingManager.init();
+        //FurnaceRecipes.instance().smeltingList = new FurnaceRecipes().smeltingList; Lava-test only reset CB recipes
         FurnaceRecipes.instance().customRecipes.clear();
         FurnaceRecipes.instance().customExperience.clear();
     }

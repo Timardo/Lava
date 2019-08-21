@@ -15,10 +15,9 @@
 +    public float[] inventoryHandsDropChances = new float[2]; //Craftbukkit - protected -> public
      private final NonNullList<ItemStack> inventoryArmor = NonNullList.<ItemStack>withSize(4, ItemStack.EMPTY);
 -    protected float[] inventoryArmorDropChances = new float[4];
--    private boolean canPickUpLoot;
--    private boolean persistenceRequired;
 +    public float[] inventoryArmorDropChances = new float[4]; //Craftbukkit - protected -> public
-+    // private boolean thisisatest; // CraftBukkit - moved up to EntityLivingBase
+     private boolean canPickUpLoot;
+-    private boolean persistenceRequired;
 +    public boolean persistenceRequired; //Craftbukkit - private -> public
      private final Map<PathNodeType, Float> mapPathPriority = Maps.newEnumMap(PathNodeType.class);
      private ResourceLocation deathLootTable;
@@ -50,37 +49,19 @@
      public boolean canAttackClass(Class <? extends EntityLivingBase > cls)
      {
          return cls != EntityGhast.class;
-@@ -355,7 +364,7 @@
-     public void writeEntityToNBT(NBTTagCompound compound)
-     {
-         super.writeEntityToNBT(compound);
--        compound.setBoolean("CanPickUpLoot", this.canPickUpLoot());
-+        compound.setBoolean("CanPickUpLoot", this.thisisatestof());
-         compound.setBoolean("PersistenceRequired", this.persistenceRequired);
-         NBTTagList nbttaglist = new NBTTagList();
- 
 @@ -449,9 +458,11 @@
  
          if (compound.hasKey("CanPickUpLoot", 1))
          {
 -            this.setCanPickUpLoot(compound.getBoolean("CanPickUpLoot"));
 +            if (isLevelAtLeast(compound, 1) || compound.getBoolean("CanPickUpLoot"))
-+            this.idkwhyreyoudoingthis(compound.getBoolean("CanPickUpLoot")); // CraftBukkit - If looting or persistence is false only use it if it was set after we started using it
++            this.setCanPickUpLoot(compound.getBoolean("CanPickUpLoot")); // CraftBukkit - If looting or persistence is false only use it if it was set after we started using it
          }
  
 +        if (isLevelAtLeast(compound, 1) || compound.getBoolean("PersistenceRequired")) //Craftbukkit
          this.persistenceRequired = compound.getBoolean("PersistenceRequired");
  
          if (compound.hasKey("ArmorItems", 9))
-@@ -577,7 +588,7 @@
-         super.onLivingUpdate();
-         this.world.profiler.startSection("looting");
- 
--        if (!this.world.isRemote && this.canPickUpLoot() && !this.dead && net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this))
-+        if (!this.world.isRemote && this.thisisatestof() && !this.dead && net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this))
-         {
-             for (EntityItem entityitem : this.world.getEntitiesWithinAABB(EntityItem.class, this.getEntityBoundingBox().grow(1.0D, 0.0D, 1.0D)))
-             {
 @@ -653,7 +664,16 @@
              }
          }
@@ -123,26 +104,24 @@
                  {
                      this.setDead();
                  }
-@@ -1190,14 +1210,14 @@
-         }
-     }
+@@ -1192,12 +1212,14 @@
  
--    public boolean canPickUpLoot()
-+    public boolean thisisatestof()
+     public boolean canPickUpLoot()
      {
 -        return this.canPickUpLoot;
-+        return thisisatest;
++        if (this instanceof EntityLivingBase && !(this instanceof EntityLiving)) return this.canPickUpLootCB; //Lava-test - use CB field for players TODO probably useless ...
++        return canPickUpLoot;
      }
  
--    public void setCanPickUpLoot(boolean canPickup)
-+    public void idkwhyreyoudoingthis(boolean canPickup)
+     public void setCanPickUpLoot(boolean canPickup)
      {
 -        this.canPickUpLoot = canPickup;
-+        thisisatest = canPickup;
++        if (this instanceof EntityLivingBase && !(this instanceof EntityLiving)) this.canPickUpLootCB = canPickup; //Lava-test - use CB field for players
++        canPickUpLoot = canPickup;
      }
  
      public boolean isNoDespawnRequired()
-@@ -1209,6 +1229,12 @@
+@@ -1209,6 +1231,12 @@
      {
          if (this.getLeashed() && this.getLeashHolder() == player)
          {
@@ -155,7 +134,7 @@
              this.clearLeashed(true, !player.capabilities.isCreativeMode);
              return true;
          }
-@@ -1218,6 +1244,12 @@
+@@ -1218,6 +1246,12 @@
  
              if (itemstack.getItem() == Items.LEAD && this.canBeLeashedTo(player))
              {
@@ -168,7 +147,7 @@
                  this.setLeashHolder(player, true);
                  itemstack.shrink(1);
                  return true;
-@@ -1245,11 +1277,13 @@
+@@ -1245,11 +1279,13 @@
          {
              if (!this.isEntityAlive())
              {
@@ -182,7 +161,7 @@
                  this.clearLeashed(true, true);
              }
          }
-@@ -1348,6 +1382,7 @@
+@@ -1348,6 +1384,7 @@
              }
              else
              {

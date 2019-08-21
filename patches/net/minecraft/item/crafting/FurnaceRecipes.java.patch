@@ -5,11 +5,11 @@
  {
      private static final FurnaceRecipes SMELTING_BASE = new FurnaceRecipes();
 -    private final Map<ItemStack, ItemStack> smeltingList = Maps.<ItemStack, ItemStack>newHashMap();
-+    public Map<ItemStack, ItemStack> smeltingList = Maps.<ItemStack, ItemStack>newHashMap();
++    public Map<ItemStack, ItemStack> smeltingList = Maps.<ItemStack, ItemStack>newHashMap(); //Craftbukkit - private -> public -final
      private final Map<ItemStack, Float> experienceList = Maps.<ItemStack, Float>newHashMap();
  
-+    public Map<ItemStack,ItemStack> customRecipes = Maps.newHashMap();
-+    public Map<ItemStack,Float> customExperience = Maps.newHashMap();
++    public Map<ItemStack,ItemStack> customRecipes = Maps.newHashMap(); //Craftbukkit TODO - check these, register in forge registry?
++    public Map<ItemStack,Float> customExperience = Maps.newHashMap(); //Craftbukkit
 +
      public static FurnaceRecipes instance()
      {
@@ -17,14 +17,15 @@
      }
  
 -    private FurnaceRecipes()
-+    public FurnaceRecipes()
++    public FurnaceRecipes() //Craftbukkit - private -> public
      {
          this.addSmeltingRecipeForBlock(Blocks.IRON_ORE, new ItemStack(Items.IRON_INGOT), 0.7F);
          this.addSmeltingRecipeForBlock(Blocks.GOLD_ORE, new ItemStack(Items.GOLD_INGOT), 1.0F);
-@@ -101,6 +104,11 @@
+@@ -101,6 +104,12 @@
          this.addSmeltingRecipe(new ItemStack(Blocks.STAINED_HARDENED_CLAY, 1, EnumDyeColor.BLACK.getMetadata()), new ItemStack(Blocks.BLACK_GLAZED_TERRACOTTA), 0.1F);
      }
  
++    //Craftbukkit method - used for custom recipes registration
 +    public void registerRecipe(ItemStack itemstack, ItemStack itemstack1, float f) {
 +        this.customRecipes.put(itemstack, itemstack1);
 +        this.customExperience.put(itemstack, f);
@@ -33,33 +34,31 @@
      public void addSmeltingRecipeForBlock(Block input, ItemStack stack, float experience)
      {
          this.addSmelting(Item.getItemFromBlock(input), stack, experience);
-@@ -120,6 +128,14 @@
+@@ -120,6 +129,13 @@
  
      public ItemStack getSmeltingResult(ItemStack stack)
      {
-+        for (Entry<ItemStack, ItemStack> entry : this.customRecipes.entrySet())
-+        {
-+            if (this.compareItemStacks(stack, entry.getKey()))
-+            {
++        //Craftbukkit start - custom recipes
++        for (Entry<ItemStack, ItemStack> entry : this.customRecipes.entrySet()) {
++            if (this.compareItemStacks(stack, entry.getKey())) {
 +                return entry.getValue();
 +            }
 +        }
-+
++        //Craftbukkit end
          for (Entry<ItemStack, ItemStack> entry : this.smeltingList.entrySet())
          {
              if (this.compareItemStacks(stack, entry.getKey()))
-@@ -146,6 +162,14 @@
+@@ -146,6 +162,13 @@
          float ret = stack.getItem().getSmeltingExperience(stack);
          if (ret != -1) return ret;
  
-+        for (Entry<ItemStack, Float> entry : this.customExperience.entrySet())
-+        {
-+            if (this.compareItemStacks(stack, entry.getKey()))
-+            {
++        //Craftbukkit start
++        for (Entry<ItemStack, Float> entry : this.customExperience.entrySet()) {
++            if (this.compareItemStacks(stack, entry.getKey())) {
 +                return ((Float)entry.getValue()).floatValue();
 +            }
 +        }
-+
++        //Craftbukkit end
          for (Entry<ItemStack, Float> entry : this.experienceList.entrySet())
          {
              if (this.compareItemStacks(stack, entry.getKey()))

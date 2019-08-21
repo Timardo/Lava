@@ -1,10 +1,11 @@
 --- ../src-base/minecraft/net/minecraftforge/oredict/ShapelessOreRecipe.java
 +++ ../src-work/minecraft/net/minecraftforge/oredict/ShapelessOreRecipe.java
-@@ -157,4 +157,13 @@
+@@ -157,4 +157,14 @@
          ItemStack itemstack = CraftingHelper.getItemStack(JsonUtils.getJsonObject(json, "result"), context);
          return new ShapelessOreRecipe(group.isEmpty() ? null : new ResourceLocation(group), ings, itemstack);
      }
 +
++    //Craftbukkit methods
 +    @Override
 +    public org.bukkit.inventory.Recipe toBukkitRecipe() {
 +        throw new UnsupportedOperationException("Cannot get Bukkit Recipe from ShapelessOreRecipe");

@@ -40,7 +40,7 @@
 +
 +        //Craftbukkit start
 +        this.displayName = this.getName();
-+        this.thisisatest = true;
++        this.canPickUpLootCB = true; //Lava-test - use CB-special field for players 
 +        this.maxHealthCache = this.getMaxHealth();
 +        //Craftbukkit end
      }

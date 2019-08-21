@@ -1,32 +1,30 @@
 --- ../src-base/minecraft/net/minecraft/item/ItemMonsterPlacer.java
 +++ ../src-work/minecraft/net/minecraft/item/ItemMonsterPlacer.java
-@@ -220,6 +220,11 @@
-     @Nullable
-     public static Entity spawnCreature(World worldIn, @Nullable ResourceLocation entityID, double x, double y, double z)
-     {
-+        return spawnCreature(worldIn, entityID, x, y, z, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.SPAWNER_EGG);
-+    }
-+
-+    @Nullable
-+    public static Entity spawnCreature(World worldIn, @Nullable ResourceLocation entityID, double x, double y, double z, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason spawnReason) {
-         if (entityID != null && EntityList.ENTITY_EGGS.containsKey(entityID))
-         {
-             Entity entity = null;
-@@ -236,8 +241,15 @@
+@@ -236,8 +236,13 @@
                      entityliving.renderYawOffset = entityliving.rotationYaw;
                      if (net.minecraftforge.event.ForgeEventFactory.doSpecialSpawn(entityliving, worldIn, (float) x, (float) y, (float) z, null)) return null;
                      entityliving.onInitialSpawn(worldIn.getDifficultyForLocation(new BlockPos(entityliving)), (IEntityLivingData)null);
 -                    worldIn.spawnEntity(entity);
--                    entityliving.playLivingSound();
-+                    // worldIn.spawnEntity(entity);
-+                    // entityliving.playLivingSound();
 +                    // CraftBukkit start - don't return an entity when CreatureSpawnEvent is canceled
-+                    if (!worldIn.spawnEntity(entity, spawnReason)) {
-+                        entity = null;
-+                    } else {
-+                        entityliving.playLivingSound();
-+                    }
++                    // worldIn.spawnEntity(entity);
++                    if (!worldIn.spawnEntity(entity, reason == null ? org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.SPAWNER_EGG : reason)) entity = null;
++                    else
 +                    // CraftBukkit end
+                     entityliving.playLivingSound();
++                    reason = null; //Lava-test
                  }
              }
  
+@@ -306,4 +311,12 @@
+             }
+         }
+     }
++    //Lava-test start - add field for spawnreason and CB method as a delegate
++    private static org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason reason;
++    @Nullable
++    public static Entity spawnCreature(World worldIn, @Nullable ResourceLocation entityID, double x, double y, double z, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason spawnReason) {
++        reason = spawnReason;
++        return spawnCreature(worldIn, entityID, x, y, z);
++    }
++    //Lava-test end
+ }

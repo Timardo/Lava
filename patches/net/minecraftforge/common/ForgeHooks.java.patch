@@ -1,15 +1,132 @@
 --- ../src-base/minecraft/net/minecraftforge/common/ForgeHooks.java
 +++ ../src-work/minecraft/net/minecraftforge/common/ForgeHooks.java
-@@ -164,6 +164,8 @@
+@@ -47,6 +47,8 @@
+ import net.minecraft.block.Block;
+ import net.minecraft.block.BlockFarmland;
+ import net.minecraft.block.BlockLiquid;
++import net.minecraft.block.BlockMushroom;
++import net.minecraft.block.BlockSapling;
+ import net.minecraft.block.material.Material;
+ import net.minecraft.block.state.IBlockState;
+ import net.minecraft.client.Minecraft;
+@@ -69,6 +71,7 @@
+ import net.minecraft.item.Item;
+ import net.minecraft.item.ItemAxe;
+ import net.minecraft.item.ItemBucket;
++import net.minecraft.item.ItemDye;
+ import net.minecraft.item.ItemEnchantedBook;
+ import net.minecraft.item.ItemMonsterPlacer;
+ import net.minecraft.item.ItemPickaxe;
+@@ -164,6 +167,13 @@
  
  import org.apache.commons.io.FilenameUtils;
  import org.apache.commons.io.IOUtils;
++import org.bukkit.Location;
++import org.bukkit.TreeType;
++import org.bukkit.block.BlockState;
 +import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.entity.Player;
++import org.bukkit.event.world.StructureGrowEvent;
 +import org.lavapowered.lava.events.LavaEventFactory;
  
  public class ForgeHooks
  {
-@@ -1292,7 +1294,8 @@
+@@ -884,6 +894,12 @@
+         if (!(itemstack.getItem() instanceof ItemBucket)) // if not bucket
+         {
+             world.captureBlockSnapshots = true;
++            if (itemstack.getItem() instanceof ItemDye && itemstack.getItemDamage() == 15) { //Craftbukkit addds tree generation event
++                Block block = world.getBlockState(pos).getBlock();
++                if (block == Blocks.SAPLING || block instanceof BlockMushroom) { //TODO test if it works for modded saplings and growable blocks too
++                    world.captureTreeGeneration = true;
++                }
++            }
+         }
+ 
+         EnumActionResult ret = itemstack.getItem().onItemUse(player, world, pos, hand, side, hitX, hitY, hitZ);
+@@ -899,6 +915,64 @@
+             {
+                 newNBT = itemstack.getTagCompound().copy();
+             }
++            //Lava-test start - StructureGrowEvent
++            if (world.captureTreeGeneration && world.capturedBlockSnapshots.size() > 0) {
++                world.captureTreeGeneration = false;
++                Location location = new Location(world.getWorld(), pos.getX(), pos.getY(), pos.getZ());
++                TreeType treeType = BlockSapling.treeType;
++                BlockSapling.treeType = null;
++                List<BlockSnapshot> blockSnapshots = (List<BlockSnapshot>)world.capturedBlockSnapshots.clone();
++                world.capturedBlockSnapshots.clear();
++                List<BlockState> blocks = new ArrayList<BlockState>();
++                
++                for (BlockSnapshot snapshot : blockSnapshots) 
++                    blocks.add(new org.bukkit.craftbukkit.block.CraftBlockState(snapshot));
++                
++                StructureGrowEvent event = null;
++                if (treeType != null) {
++                    boolean isBonemeal = itemstack.getItem() == Items.DYE && meta == 15;
++                    event = new StructureGrowEvent(location, treeType, isBonemeal, (Player) player.getBukkitEntity(), blocks);
++                    org.bukkit.Bukkit.getPluginManager().callEvent(event);
++                }
++                if (event != null && event.isCancelled()) //taken from below for consistency
++                {
++                    ret = EnumActionResult.FAIL;
++                    // revert back all captured blocks
++                    for (BlockSnapshot blocksnapshot : Lists.reverse(blockSnapshots))
++                    {
++                        world.restoringBlockSnapshots = true;
++                        blocksnapshot.restore(true, false);
++                        world.restoringBlockSnapshots = false;
++                    }
++                }
++                else
++                {
++                    // Change the stack to its new content
++                    itemstack.setItemDamage(newMeta);
++                    itemstack.setCount(newSize);
++                    if (nbt != null)
++                    {
++                        itemstack.setTagCompound(newNBT);
++                    }
++
++                    for (BlockSnapshot snap : blockSnapshots)
++                    {
++                        int updateFlag = snap.getFlag();
++                        IBlockState oldBlock = snap.getReplacedBlock();
++                        IBlockState newBlock = world.getBlockState(snap.getPos());
++                        if (!newBlock.getBlock().hasTileEntity(newBlock)) // Containers get placed automatically
++                        {
++                            newBlock.getBlock().onBlockAdded(world, snap.getPos(), newBlock);
++                        }
++
++                        world.markAndNotifyBlock(snap.getPos(), null, oldBlock, newBlock, updateFlag);
++                    }
++                    player.addStat(StatList.getObjectUseStats(itemstack.getItem()));
++                }
++
++                return ret; //return as we won't fire place event
++            }
++            //Lava-test end TODO move to LavaEventFactory as it is used more than once
+             BlockEvent.PlaceEvent placeEvent = null;
+             @SuppressWarnings("unchecked")
+             List<BlockSnapshot> blockSnapshots = (List<BlockSnapshot>)world.capturedBlockSnapshots.clone();
+@@ -911,6 +985,7 @@
+             {
+                 itemstack.setTagCompound(nbt);
+             }
++            player.clickedBlock = new int[3]; player.clickedBlock[0] = pos.getX(); player.clickedBlock[1] = pos.getY(); player.clickedBlock[2] = pos.getZ(); //Lava-test - set clicked block location for event
+             if (blockSnapshots.size() > 1)
+             {
+                 placeEvent = ForgeEventFactory.onPlayerMultiBlockPlace(player, blockSnapshots, side, hand);
+@@ -919,7 +994,7 @@
+             {
+                 placeEvent = ForgeEventFactory.onPlayerBlockPlace(player, blockSnapshots.get(0), side, hand);
+             }
+-
++            player.clickedBlock = null; //Lava-test - reset
+             if (placeEvent != null && placeEvent.isCanceled())
+             {
+                 ret = EnumActionResult.FAIL; // cancel placement
+@@ -1292,7 +1367,8 @@
      {
          BlockEvent ev = new BlockEvent.CropGrowEvent.Pre(worldIn,pos,state);
          MinecraftForge.EVENT_BUS.post(ev);
@@ -19,7 +136,7 @@
      }
  
      public static void onCropsGrowPost(World worldIn, BlockPos pos, IBlockState state, IBlockState blockState)
-@@ -1411,6 +1414,8 @@
+@@ -1411,6 +1487,8 @@
  
      public static void onAdvancement(EntityPlayerMP player, Advancement advancement)
      {
@@ -28,7 +145,7 @@
          MinecraftForge.EVENT_BUS.post(new AdvancementEvent(player, advancement));
      }
  
-@@ -1470,7 +1475,8 @@
+@@ -1470,7 +1548,8 @@
          {
              BlockEvent.FarmlandTrampleEvent event = new BlockEvent.FarmlandTrampleEvent(world, pos, state, fallDistance, entity);
              MinecraftForge.EVENT_BUS.post(event);

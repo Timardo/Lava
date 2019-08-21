@@ -1,9 +1,13 @@
 package org.lavapowered.lava.events;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.entity.CraftItem;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -11,26 +15,42 @@ import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.util.CraftChatMessage;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockMultiPlaceEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.world.WorldLoadEvent;
+import org.lavapowered.lava.util.Utils;
+
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityShulker;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.EnderTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
+import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.event.entity.player.PlayerDropsEvent;
+import net.minecraftforge.event.world.BlockEvent.MultiPlaceEvent;
+import net.minecraftforge.event.world.BlockEvent.PlaceEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -199,5 +219,33 @@ public class LavaEventHandler {
             target = null;
         }
         ((EntityLiving)entity).setAttackTarget(target); //override the attack target
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onWorldLoad(WorldEvent.Load e) {
+        Bukkit.getPluginManager().callEvent(new WorldLoadEvent(e.getWorld().getWorld()));
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onMultiPlaceEvent(MultiPlaceEvent e) {
+        int[] loc = e.getPlayer().clickedBlock;
+        List<BlockState> blocks = new ArrayList<BlockState>();
+        
+        for (BlockSnapshot snapshot : e.getReplacedBlockSnapshots()) //Convert snapshots to block states TODO make a convenient method for conversion in Utils?
+            blocks.add(new CraftBlockState(snapshot));
+        
+        BlockMultiPlaceEvent event = CraftEventFactory.callBlockMultiPlaceEvent(e.getWorld(), e.getPlayer(), e.getHand(), blocks, loc[0], loc[1], loc[2]);
+        
+        if (event.isCancelled() || !event.canBuild())
+            e.setCanceled(true);
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onPlaceEvent(PlaceEvent e) {
+        int[] loc = e.getPlayer().clickedBlock != null ? e.getPlayer().clickedBlock : Utils.toIntArr(e.getBlockSnapshot()); //handle lily pads as they are not going through ForgeHooks
+        BlockPlaceEvent event = CraftEventFactory.callBlockPlaceEvent(e.getWorld(), e.getPlayer(), e.getHand(), new CraftBlockState(e.getBlockSnapshot()), loc[0], loc[1], loc[2]);
+        
+        if (event.isCancelled() || !event.canBuild())
+            e.setCanceled(true);
     }
 }

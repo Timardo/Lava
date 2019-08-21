@@ -1,14 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/inventory/ContainerHorseInventory.java
 +++ ../src-work/minecraft/net/minecraft/inventory/ContainerHorseInventory.java
-@@ -7,14 +7,22 @@
- import net.minecraft.item.ItemStack;
- import net.minecraftforge.fml.relauncher.Side;
- import net.minecraftforge.fml.relauncher.SideOnly;
-+import org.bukkit.craftbukkit.inventory.CraftInventoryView;
-+import org.bukkit.inventory.InventoryView;
- 
- public class ContainerHorseInventory extends Container
- {
+@@ -13,8 +13,14 @@
      private final IInventory horseInventory;
      private final AbstractHorse horse;
  
@@ -23,13 +15,13 @@
          this.horseInventory = horseInventoryIn;
          this.horse = horse;
          int i = 3;
-@@ -133,4 +141,9 @@
+@@ -133,4 +139,9 @@
          super.onContainerClosed(playerIn);
          this.horseInventory.closeInventory(playerIn);
      }
 +
 +    //Craftbukkit method
 +    @Override
-+    public InventoryView getBukkitView() { return bukkitEntity == null ? bukkitEntity = new CraftInventoryView(player.player.getBukkitEntity(), horseInventory.getOwner().getInventory(), this) : bukkitEntity; }
++    public org.bukkit.inventory.InventoryView getBukkitView() { return bukkitEntity == null ? bukkitEntity = new org.bukkit.craftbukkit.inventory.CraftInventoryView(player.player.getBukkitEntity(), horseInventory.getOwner().getInventory(), this) : bukkitEntity; }
 +
  }

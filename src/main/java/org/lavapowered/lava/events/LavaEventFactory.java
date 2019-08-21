@@ -9,19 +9,16 @@ import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.craftbukkit.entity.CraftItem;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
-import org.bukkit.entity.Ageable;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.entity.*;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.player.PlayerEggThrowEvent;
-import org.bukkit.event.player.PlayerPickupArrowEvent;
-import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.*;
+import org.lavapowered.lava.util.Utils;
+
 import net.minecraft.block.BlockCactus;
 import net.minecraft.block.BlockCocoa;
 import net.minecraft.block.BlockCrops;
@@ -35,7 +32,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityEgg;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -86,8 +86,9 @@ public class LavaEventFactory {
             cancellable = CraftEventFactory.callPlayerInteractEvent((EntityPlayer) entity, Action.PHYSICAL, pos, null, null, null);
         } else {
             cancellable = new EntityInteractEvent(entity.getBukkitEntity(), world.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()));
-            world.getServer().getPluginManager().callEvent((EntityInteractEvent) cancellable);
         }
+		
+		world.getServer().getPluginManager().callEvent((EntityInteractEvent) cancellable);
 		
         if (cancellable.isCancelled()) {
             return false;
@@ -118,7 +119,7 @@ public class LavaEventFactory {
             //itemstack.setCount(canHold);
             // Call legacy event
             PlayerPickupItemEvent playerEvent = new PlayerPickupItemEvent((Player) player.getBukkitEntity(), (Item) entityItem.getBukkitEntity(), remaining);
-            playerEvent.setCancelled(!player.thisisatest);
+            playerEvent.setCancelled(!player.canPickUpLootCB);
             entityItem.world.getServer().getPluginManager().callEvent(playerEvent);
             if (playerEvent.isCancelled()) {
                 return 0;
@@ -126,7 +127,7 @@ public class LavaEventFactory {
             
             // Call newer event afterwards
             EntityPickupItemEvent entityEvent = new EntityPickupItemEvent((Player) player.getBukkitEntity(), (Item) entityItem.getBukkitEntity(), remaining);
-            entityEvent.setCancelled(!player.thisisatest);
+            entityEvent.setCancelled(!player.canPickUpLootCB);
             entityItem.world.getServer().getPluginManager().callEvent(entityEvent);
             if (entityEvent.isCancelled()) {
                 return 0;
@@ -169,5 +170,12 @@ public class LavaEventFactory {
                 entityEgg.world.getWorld().addEntity(entity, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.EGG);
             }
         }
+    }
+
+    public static boolean onBucketFill(EntityPlayer playerIn, ItemStack itemstack, BlockPos blockpos, boolean isWater, ItemBucket itemBucket) {
+        PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(playerIn, blockpos.getX(), blockpos.getY(), blockpos.getZ(), null, itemstack, isWater ? Items.WATER_BUCKET : Items.LAVA_BUCKET);
+        if (event.isCancelled()) return true;
+        itemBucket.eventStack = CraftItemStack.asNMSCopy(event.getItemStack());
+        return false;
     }
 }

@@ -1,17 +1,10 @@
 --- ../src-base/minecraft/net/minecraft/item/crafting/CraftingManager.java
 +++ ../src-work/minecraft/net/minecraft/item/crafting/CraftingManager.java
-@@ -36,12 +36,13 @@
- {
-     private static final Logger LOGGER = LogManager.getLogger();
-     private static int nextAvailableId;
--    public static final RegistryNamespaced<ResourceLocation, IRecipe> REGISTRY = net.minecraftforge.registries.GameData.getWrapper(IRecipe.class);
-+    public static RegistryNamespaced<ResourceLocation, IRecipe> REGISTRY = net.minecraftforge.registries.GameData.getWrapper(IRecipe.class);
- 
-     public static boolean init()
+@@ -42,6 +42,7 @@
      {
          try
          {
-+            CraftingManager.nextAvailableId = 0; // Reset recipe ID count
++            CraftingManager.nextAvailableId = 0; //Craftbukkit - Reset recipe ID count TODO ???
              register("armordye", new RecipesArmorDyes());
              register("bookcloning", new RecipeBookCloning());
              register("mapcloning", new RecipesMapCloning());
@@ -19,20 +12,19 @@
          }
          else
          {
-+            recipe.setKey(name);
++            recipe.setKey(name); //Craftbukkit ???
              REGISTRY.register(nextAvailableId++, name, recipe);
          }
      }
-@@ -201,7 +203,7 @@
-                 return irecipe.getCraftingResult(craftMatrix);
+@@ -202,6 +204,7 @@
              }
          }
--
+ 
 +        craftMatrix.currentRecipe = null; // CraftBukkit - Clear recipe when no recipe is found
          return ItemStack.EMPTY;
      }
  
-@@ -212,10 +214,12 @@
+@@ -212,10 +215,12 @@
          {
              if (irecipe.matches(craftMatrix, worldIn))
              {
