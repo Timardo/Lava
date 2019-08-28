@@ -1,6 +1,14 @@
 --- ../src-base/minecraft/net/minecraft/init/Bootstrap.java
 +++ ../src-work/minecraft/net/minecraft/init/Bootstrap.java
-@@ -193,14 +193,42 @@
+@@ -67,6 +67,7 @@
+ import net.minecraft.world.World;
+ import net.minecraft.world.biome.Biome;
+ import net.minecraft.world.storage.loot.LootTableList;
++import net.minecraftforge.common.util.BlockSnapshot;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
+ import org.apache.logging.log4j.LogManager;
+@@ -193,14 +194,42 @@
                  double d0 = source.getX() + (double)enumfacing.getFrontOffsetX();
                  double d1 = (double)((float)(source.getBlockPos().getY() + enumfacing.getFrontOffsetY()) + 0.2F);
                  double d2 = source.getZ() + (double)enumfacing.getFrontOffsetZ();
@@ -44,7 +52,7 @@
                  stack.shrink(1);
                  return stack;
              }
-@@ -213,8 +241,33 @@
+@@ -213,8 +242,33 @@
                  double d0 = source.getX() + (double)enumfacing.getFrontOffsetX();
                  double d1 = (double)((float)source.getBlockPos().getY() + 0.2F);
                  double d2 = source.getZ() + (double)enumfacing.getFrontOffsetZ();
@@ -78,7 +86,7 @@
                  stack.shrink(1);
                  return stack;
              }
-@@ -237,7 +290,28 @@
+@@ -237,7 +291,28 @@
                  double d3 = random.nextGaussian() * 0.05D + (double)enumfacing.getFrontOffsetX();
                  double d4 = random.nextGaussian() * 0.05D + (double)enumfacing.getFrontOffsetY();
                  double d5 = random.nextGaussian() * 0.05D + (double)enumfacing.getFrontOffsetZ();
@@ -108,7 +116,7 @@
                  stack.shrink(1);
                  return stack;
              }
-@@ -259,7 +333,47 @@
+@@ -259,7 +334,47 @@
              {
                  ItemBucket itembucket = (ItemBucket)stack.getItem();
                  BlockPos blockpos = source.getBlockPos().offset((EnumFacing)source.getBlockState().getValue(BlockDispenser.FACING));
@@ -156,7 +164,7 @@
              }
          };
          BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.LAVA_BUCKET, ibehaviordispenseitem);
-@@ -316,17 +430,35 @@
+@@ -316,17 +431,35 @@
              protected ItemStack dispenseStack(IBlockSource source, ItemStack stack)
              {
                  World world = source.getWorld();
@@ -192,7 +200,7 @@
                  }
                  else if (world.getBlockState(blockpos).getBlock() == Blocks.TNT)
                  {
-@@ -351,7 +483,25 @@
+@@ -351,7 +484,25 @@
                  {
                      World world = source.getWorld();
                      BlockPos blockpos = source.getBlockPos().offset((EnumFacing)source.getBlockState().getValue(BlockDispenser.FACING));
@@ -218,7 +226,7 @@
                      if (ItemDye.applyBonemeal(stack, world, blockpos))
                      {
                          if (!world.isRemote)
-@@ -364,6 +514,29 @@
+@@ -364,6 +515,32 @@
                          this.successful = false;
                      }
  
@@ -238,17 +246,20 @@
 +                            structureEvent = new org.bukkit.event.world.StructureGrowEvent(new org.bukkit.Location(world.getWorld(), blockpos.getX(), blockpos.getY(), blockpos.getZ()), treeType, false, null, blockstates);
 +                            org.bukkit.Bukkit.getPluginManager().callEvent(structureEvent);
 +                        }
-+                        if (structureEvent == null || !structureEvent.isCancelled()) {
-+                            for (org.bukkit.block.BlockState blockstate : blockstates) {
-+                                blockstate.update(true);
++                        if (structureEvent == null || !structureEvent.isCancelled())
++                            // revert back all captured blocks, taken from ForgeHooks
++                            for (net.minecraftforge.common.util.BlockSnapshot blocksnapshot : com.google.common.collect.Lists.reverse(blocks))
++                            {
++                                world.restoringBlockSnapshots = true;
++                                blocksnapshot.restore(true, false);
++                                world.restoringBlockSnapshots = false;
 +                            }
-+                        }
 +                    }
 +                    //Lava end
                      return stack;
                  }
                  else
-@@ -378,7 +551,27 @@
+@@ -378,7 +555,27 @@
              {
                  World world = source.getWorld();
                  BlockPos blockpos = source.getBlockPos().offset((EnumFacing)source.getBlockState().getValue(BlockDispenser.FACING));
@@ -276,7 +287,7 @@
                  world.spawnEntity(entitytntprimed);
                  world.playSound((EntityPlayer)null, entitytntprimed.posX, entitytntprimed.posY, entitytntprimed.posZ, SoundEvents.ENTITY_TNT_PRIMED, SoundCategory.BLOCKS, 1.0F, 1.0F);
                  stack.shrink(1);
-@@ -393,6 +586,23 @@
+@@ -393,6 +590,23 @@
                  EnumFacing enumfacing = (EnumFacing)source.getBlockState().getValue(BlockDispenser.FACING);
                  BlockPos blockpos = source.getBlockPos().offset(enumfacing);
                  BlockSkull blockskull = Blocks.SKULL;
@@ -300,7 +311,7 @@
                  this.successful = true;
  
                  if (world.isAirBlock(blockpos) && blockskull.canDispenserPlace(world, blockpos, stack))
-@@ -456,6 +666,23 @@
+@@ -456,6 +670,23 @@
                  World world = source.getWorld();
                  BlockPos blockpos = source.getBlockPos().offset((EnumFacing)source.getBlockState().getValue(BlockDispenser.FACING));
                  BlockPumpkin blockpumpkin = (BlockPumpkin)Blocks.PUMPKIN;
@@ -324,7 +335,7 @@
                  this.successful = true;
  
                  if (world.isAirBlock(blockpos) && blockpumpkin.canDispenserPlace(world, blockpos))
-@@ -587,11 +814,31 @@
+@@ -587,11 +818,31 @@
  
                      d3 = 0.0D;
                  }
@@ -357,7 +368,7 @@
                  stack.shrink(1);
                  return stack;
              }
-@@ -624,6 +871,23 @@
+@@ -624,6 +875,23 @@
                  World world = source.getWorld();
                  EnumFacing enumfacing = (EnumFacing)source.getBlockState().getValue(BlockDispenser.FACING);
                  BlockPos blockpos = source.getBlockPos().offset(enumfacing);

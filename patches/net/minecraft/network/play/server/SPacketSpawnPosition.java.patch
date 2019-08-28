@@ -5,7 +5,7 @@
  public class SPacketSpawnPosition implements Packet<INetHandlerPlayClient>
  {
 -    private BlockPos spawnBlockPos;
-+    public BlockPos spawnBlockPos;
++    public BlockPos spawnBlockPos; //Craftbukkit - private -> public
  
      public SPacketSpawnPosition()
      {

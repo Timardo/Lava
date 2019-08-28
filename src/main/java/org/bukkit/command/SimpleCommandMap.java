@@ -3,13 +3,13 @@ package org.bukkit.command;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.Server;
-import org.bukkit.command.defaults.BukkitCommand;
-import org.bukkit.command.defaults.HelpCommand;
-import org.bukkit.command.defaults.PluginsCommand;
-import org.bukkit.command.defaults.VersionCommand;
+import org.bukkit.command.defaults.*;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 import org.lavapowered.lava.internal.Lava;
+import org.lavapowered.lava.wrapper.BukkitCommandWrapper;
+
+import net.minecraft.command.CommandHandler;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -25,8 +25,10 @@ public class SimpleCommandMap implements CommandMap {
     }
 
     private void setDefaultCommands() {
-        register("bukkit", new PluginsCommand("plugins"));
         register("bukkit", new VersionCommand("version"));
+        register("bukkit", new ReloadCommand("reload"));
+        register("bukkit", new PluginsCommand("plugins"));
+        //register("bukkit", new TimingsCommand("timings")); spigot TODO
     }
 
     public void setFallbackCommands() {
@@ -89,8 +91,10 @@ public class SimpleCommandMap implements CommandMap {
      * @return true if command was registered, false otherwise.
      */
     private synchronized boolean register(String label, Command command, boolean isAlias, String fallbackPrefix) {
-        knownCommands.put(fallbackPrefix + ":" + label, command);
-        if ((command instanceof BukkitCommand || isAlias) && knownCommands.containsKey(label)) {
+        if (!Lava.getServer().getCommandManager().getCommands().containsKey(label))
+            ((CommandHandler)Lava.getServer().getCommandManager()).registerCommand(new BukkitCommandWrapper(command, label));
+        knownCommands.put(fallbackPrefix + ":" + label, command); //put the command with prefix
+        if ((command instanceof BukkitCommand || isAlias) && knownCommands.containsKey(label)) { //if this is an alias OR is bukkit internal command and already registered, don't register without the prefix again
             // Request is for an alias/fallback command and it conflicts with
             // a existing command or previous alias ignore it
             // Note: This will mean it gets removed from the commands list of active aliases
@@ -143,7 +147,7 @@ public class SimpleCommandMap implements CommandMap {
         return true;
     }
 
-    public synchronized void clearCommands() {
+    public synchronized void clearCommands() { //TODO only clear commands not regsitered as ModCustomCommand and aslo Vanilla!
         for (Map.Entry<String, Command> entry : knownCommands.entrySet()) {
             entry.getValue().unregister(this);
         }

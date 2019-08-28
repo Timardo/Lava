@@ -316,7 +316,7 @@
 -    {
 +    public void loadAllWorlds(String saveName, String worldNameIn, long seed, WorldType type, String generatorOptions) {
 +        ServerCommandManager vanillaCommandManager = (ServerCommandManager) this.getCommandManager();
-+        vanillaCommandManager.registerVanillaCommands();
++        //vanillaCommandManager.registerVanillaCommands(); //TODO we cannot register commands to bukkit before the bukkit server is actually initialized!!
          this.convertMapIfNeeded(saveName);
          this.setUserMessage("menu.loadingLevel");
 -        ISaveHandler isavehandler = this.anvilConverterForAnvilFile.getSaveLoader(saveName, true);

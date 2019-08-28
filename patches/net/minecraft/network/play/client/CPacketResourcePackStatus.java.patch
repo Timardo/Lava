@@ -5,7 +5,7 @@
  public class CPacketResourcePackStatus implements Packet<INetHandlerPlayServer>
  {
 -    private CPacketResourcePackStatus.Action action;
-+    public Action action;
++    public CPacketResourcePackStatus.Action action; //Craftbukkit - private -> public
  
      public CPacketResourcePackStatus()
      {

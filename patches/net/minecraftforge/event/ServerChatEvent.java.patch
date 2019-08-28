@@ -1,0 +1,26 @@
+--- ../src-base/minecraft/net/minecraftforge/event/ServerChatEvent.java
++++ ../src-work/minecraft/net/minecraftforge/event/ServerChatEvent.java
+@@ -57,6 +57,7 @@
+         this.player = player;
+         this.username = player.getGameProfile().getName();
+         this.component = component;
++        this.async = true; //Lava-test - default to true
+     }
+ 
+     public void setComponent(ITextComponent e)
+@@ -72,4 +73,15 @@
+     public String getMessage() { return this.message; }
+     public String getUsername() { return this.username; }
+     public EntityPlayerMP getPlayer() { return this.player; }
++    //Lava-test start - add boolean which determines if the chat is being async
++    private final boolean async;
++    public ServerChatEvent(EntityPlayerMP player, String message, ITextComponent component, boolean async) {
++        super();
++        this.message = message;
++        this.player = player;
++        this.username = player.getGameProfile().getName();
++        this.component = component;
++        this.async = async;
++    }
++    public boolean isAsync() { return this.async; }
+ }

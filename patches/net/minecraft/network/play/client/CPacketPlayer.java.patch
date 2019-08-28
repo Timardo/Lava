@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/network/play/client/CPacketPlayer.java
 +++ ../src-work/minecraft/net/minecraft/network/play/client/CPacketPlayer.java
-@@ -9,14 +9,14 @@
+@@ -9,14 +9,16 @@
  
  public class CPacketPlayer implements Packet<INetHandlerPlayServer>
  {
@@ -9,16 +9,18 @@
 -    protected double z;
 -    protected float yaw;
 -    protected float pitch;
++    //Craftbukkit start - protected -> public
 +    public double x;
 +    public double y;
 +    public double z;
 +    public float yaw;
 +    public float pitch;
++    //Craftbukkit end
      protected boolean onGround;
 -    protected boolean moving;
 -    protected boolean rotating;
-+    public boolean moving;
-+    public boolean rotating;
++    public boolean moving; //Craftbukkit - protected -> public
++    public boolean rotating; //Craftbukkit - protected -> public
  
      public CPacketPlayer()
      {

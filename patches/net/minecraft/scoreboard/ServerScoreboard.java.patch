@@ -1,81 +1,103 @@
 --- ../src-base/minecraft/net/minecraft/scoreboard/ServerScoreboard.java
 +++ ../src-work/minecraft/net/minecraft/scoreboard/ServerScoreboard.java
-@@ -30,7 +30,7 @@
+@@ -30,7 +30,11 @@
  
          if (this.addedObjectives.contains(scoreIn.getObjective()))
          {
--            this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketUpdateScore(scoreIn));
++            /* Craftbukkit start - use bukkit scores TODO nope, use miencraft scores and bukkit scores just as a delegate
+             this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketUpdateScore(scoreIn));
++             */
 +            this.sendAll(new SPacketUpdateScore(scoreIn));
++            //Craftbukkit end
          }
  
          this.markSaveDataDirty();
-@@ -39,14 +39,14 @@
+@@ -39,14 +43,22 @@
      public void broadcastScoreUpdate(String scoreName)
      {
          super.broadcastScoreUpdate(scoreName);
--        this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketUpdateScore(scoreName));
++        /* Craftbukkit start - use bukkit scores TODO nope, use miencraft scores and bukkit scores just as a delegate
+         this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketUpdateScore(scoreName));
++         */
 +        this.sendAll(new SPacketUpdateScore(scoreName));
++        //Craftbukkit end
          this.markSaveDataDirty();
      }
  
      public void broadcastScoreUpdate(String scoreName, ScoreObjective objective)
      {
          super.broadcastScoreUpdate(scoreName, objective);
--        this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketUpdateScore(scoreName, objective));
++        /* Craftbukkit start - use bukkit scores TODO nope, use miencraft scores and bukkit scores just as a delegate
+         this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketUpdateScore(scoreName, objective));
++         */
 +        this.sendAll(new SPacketUpdateScore(scoreName, objective));
++        //Craftbukkit end
          this.markSaveDataDirty();
      }
  
-@@ -59,7 +59,7 @@
+@@ -59,7 +71,11 @@
          {
              if (this.getObjectiveDisplaySlotCount(scoreobjective) > 0)
              {
--                this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketDisplayObjective(objectiveSlot, objective));
++                /* Craftbukkit start - use bukkit scores TODO nope, use miencraft scores and bukkit scores just as a delegate
+                 this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketDisplayObjective(objectiveSlot, objective));
++                 */
 +                this.sendAll(new SPacketDisplayObjective(objectiveSlot, objective));
++                //Craftbukkit end
              }
              else
              {
-@@ -71,7 +71,7 @@
+@@ -71,7 +87,10 @@
          {
              if (this.addedObjectives.contains(objective))
              {
--                this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketDisplayObjective(objectiveSlot, objective));
++                /* Craftbukkit start - use bukkit scores TODO nope, use miencraft scores and bukkit scores just as a delegate
+                 this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketDisplayObjective(objectiveSlot, objective));
++                 */
 +                this.sendAll(new SPacketDisplayObjective(objectiveSlot, objective));
              }
              else
              {
-@@ -87,7 +87,7 @@
+@@ -87,7 +106,10 @@
          if (super.addPlayerToTeam(player, newTeam))
          {
              ScorePlayerTeam scoreplayerteam = this.getTeam(newTeam);
--            this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketTeams(scoreplayerteam, Arrays.asList(player), 3));
++            /* Craftbukkit start - use bukkit scores TODO nope, use miencraft scores and bukkit scores just as a delegate
+             this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketTeams(scoreplayerteam, Arrays.asList(player), 3));
++             */
 +            this.sendAll(new SPacketTeams(scoreplayerteam, Arrays.asList(player), 3));
              this.markSaveDataDirty();
              return true;
          }
-@@ -100,7 +100,7 @@
+@@ -100,7 +122,10 @@
      public void removePlayerFromTeam(String username, ScorePlayerTeam playerTeam)
      {
          super.removePlayerFromTeam(username, playerTeam);
--        this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketTeams(playerTeam, Arrays.asList(username), 4));
++        /* Craftbukkit start - use bukkit scores TODO nope, use miencraft scores and bukkit scores just as a delegate
+         this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketTeams(playerTeam, Arrays.asList(username), 4));
++         */
 +        this.sendAll(new SPacketTeams(playerTeam, Arrays.asList(username), 4));
          this.markSaveDataDirty();
      }
  
-@@ -116,7 +116,7 @@
+@@ -116,7 +141,10 @@
  
          if (this.addedObjectives.contains(objective))
          {
--            this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketScoreboardObjective(objective, 2));
++            /* Craftbukkit start - use bukkit scores TODO nope, use miencraft scores and bukkit scores just as a delegate
+             this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketScoreboardObjective(objective, 2));
++             */
 +            this.sendAll(new SPacketScoreboardObjective(objective, 2));
          }
  
          this.markSaveDataDirty();
-@@ -137,21 +137,21 @@
+@@ -137,21 +165,30 @@
      public void broadcastTeamCreated(ScorePlayerTeam playerTeam)
      {
          super.broadcastTeamCreated(playerTeam);
--        this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketTeams(playerTeam, 0));
++        /* Craftbukkit start - use bukkit scores TODO nope, use miencraft scores and bukkit scores just as a delegate
+         this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketTeams(playerTeam, 0));
++         */
 +        this.sendAll(new SPacketTeams(playerTeam, 0));
          this.markSaveDataDirty();
      }
@@ -83,7 +105,9 @@
      public void broadcastTeamInfoUpdate(ScorePlayerTeam playerTeam)
      {
          super.broadcastTeamInfoUpdate(playerTeam);
--        this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketTeams(playerTeam, 2));
++        /* Craftbukkit start - use bukkit scores TODO nope, use miencraft scores and bukkit scores just as a delegate
+         this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketTeams(playerTeam, 2));
++         */
 +        this.sendAll(new SPacketTeams(playerTeam, 2));
          this.markSaveDataDirty();
      }
@@ -91,12 +115,14 @@
      public void broadcastTeamRemove(ScorePlayerTeam playerTeam)
      {
          super.broadcastTeamRemove(playerTeam);
--        this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketTeams(playerTeam, 1));
++        /* Craftbukkit start - use bukkit scores TODO nope, use miencraft scores and bukkit scores just as a delegate
+         this.scoreboardMCServer.getPlayerList().sendPacketToAllPlayers(new SPacketTeams(playerTeam, 1));
++         */
 +        this.sendAll(new SPacketTeams(playerTeam, 1));
          this.markSaveDataDirty();
      }
  
-@@ -196,6 +196,7 @@
+@@ -196,6 +233,7 @@
  
          for (EntityPlayerMP entityplayermp : this.scoreboardMCServer.getPlayerList().getPlayers())
          {
@@ -104,7 +130,7 @@
              for (Packet<?> packet : list)
              {
                  entityplayermp.connection.sendPacket(packet);
-@@ -227,6 +228,7 @@
+@@ -227,6 +265,7 @@
  
          for (EntityPlayerMP entityplayermp : this.scoreboardMCServer.getPlayerList().getPlayers())
          {
@@ -112,16 +138,9 @@
              for (Packet<?> packet : list)
              {
                  entityplayermp.connection.sendPacket(packet);
-@@ -250,4 +252,12 @@
+@@ -250,4 +289,5 @@
  
          return i;
      }
-+
-+    private void sendAll(Packet packet) {
-+        for (EntityPlayerMP entityplayer : this.scoreboardMCServer.getPlayerList().getPlayers()) {
-+            if (entityplayer.getBukkitEntity().getScoreboard().getHandle() == this) {
-+                entityplayer.connection.sendPacket(packet);
-+            }
-+        }
-+    }
++    private void sendAll(Packet packet) { for (EntityPlayerMP entityplayer : this.scoreboardMCServer.getPlayerList().getPlayers()) if (entityplayer.getBukkitEntity().getScoreboard().getHandle() == this) entityplayer.connection.sendPacket(packet); } //Craftbukkit method
  }

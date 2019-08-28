@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/command/CommandHandler.java
 +++ ../src-work/minecraft/net/minecraft/command/CommandHandler.java
-@@ -144,11 +144,18 @@
+@@ -144,11 +144,17 @@
  
      protected abstract MinecraftServer getServer();
  
@@ -10,9 +10,8 @@
          this.commandMap.put(command.getName(), command);
          this.commandSet.add(command);
  
-+        //Lava-test start - preserve original code block + add NPE check
-+        if (command.getAliases() == null)
-+        {
++        //Lava-test start - only register commands not registered in Bukkit already
++        if (command.getAliases() == null && command instanceof org.lavapowered.lava.wrapper.BukkitCommandWrapper) {
 +            registerBukkitCommand(command, command.getClass().getName());
 +            return command;
 +        }
@@ -21,7 +20,7 @@
          for (String s : command.getAliases())
          {
              ICommand icommand = this.commandMap.get(s);
-@@ -158,10 +165,29 @@
+@@ -158,10 +164,26 @@
                  this.commandMap.put(s, command);
              }
          }
@@ -32,20 +31,17 @@
      }
  
 +    //Lava-test method - based on Craftbukkit
-+    public void registerBukkitCommand(ICommand command, String permissionNode)
-+    {
-+        org.bukkit.craftbukkit.command.CraftSimpleCommandMap craftCommandMap = MinecraftServer.getServerCB().server.getCraftCommandMap();
-+        org.bukkit.craftbukkit.command.ModCustomCommand customCommand = new org.bukkit.craftbukkit.command.ModCustomCommand(command.getName()); //TODO investigate
-+        customCommand.setPermission(permissionNode);
++    public void registerBukkitCommand(ICommand command, String permissionNode) {
++        org.bukkit.craftbukkit.command.CraftSimpleCommandMap craftCommandMap = getServer().server.getCraftCommandMap(); //get the command map TODO does this work?
++        org.bukkit.craftbukkit.command.ModCustomCommand customCommand = new org.bukkit.craftbukkit.command.ModCustomCommand(command.getName()); //construct new command marked as a mod (not vanilla)
++        customCommand.setPermission(permissionNode); //set permission from class name
 +        List<String> list = command.getAliases();
 +        
-+        if (list != null) 
-+        {    
++        if (list != null) //set aliases, if any
 +            customCommand.setAliases(list);
-+        }
 +        
-+        craftCommandMap.register(command.getName(), customCommand);
-+        LogManager.getLogger().info("Registered command " + command.getName() + " with permission node " + permissionNode); //TODO change to internal logger? (bukkit, forge, lava?)
++        craftCommandMap.register("mod", customCommand); //finally register TODO add modid as fallback prefix not 'mod'
++        LogManager.getLogger().info("Registered command " + command.getName() + " with permission node " + permissionNode); //TODO change to internal logger? (bukkit, forge, lava?) do it toggleable
 +    }
 +
      private static String[] dropFirstString(String[] input)

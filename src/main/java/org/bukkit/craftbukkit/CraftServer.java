@@ -330,7 +330,7 @@ public final class CraftServer implements Server {
         pluginManager.disablePlugins();
     }
 
-    private void setVanillaCommands() {
+    private void setVanillaCommands() { //TODO ONLY SET ONCE!!
         Map<String, ICommand> commands = console.getCommandManager().getCommands();
         for (ICommand cmd : commands.values()) {
             commandMap.register("minecraft",
@@ -656,7 +656,7 @@ public final class CraftServer implements Server {
     }
 
     @Override
-    public void reload() {
+    public void reload() { //TODO remove plugin commands from Vanilla command map too, also add them back
         reloadCount++;
         configuration = YamlConfiguration.loadConfiguration(getConfigFile());
         commandsConfiguration = YamlConfiguration.loadConfiguration(getCommandsConfigFile());

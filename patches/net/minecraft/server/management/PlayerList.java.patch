@@ -584,7 +584,7 @@
  
 -    public void playerLoggedOut(EntityPlayerMP playerIn)
 -    {
-+    public String playerLoggedOut(EntityPlayerMP playerIn) {
++    public String playerLoggedOut(EntityPlayerMP playerIn) { //TODO rework with onDisconnect in NetHandlerPlayServer #LN-1200
 +        String quitMessage = null;
          net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerLoggedOut(playerIn);
          WorldServer worldserver = playerIn.getServerWorld();

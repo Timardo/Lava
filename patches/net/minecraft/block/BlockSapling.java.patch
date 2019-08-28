@@ -1,6 +1,20 @@
 --- ../src-base/minecraft/net/minecraft/block/BlockSapling.java
 +++ ../src-work/minecraft/net/minecraft/block/BlockSapling.java
-@@ -30,6 +30,7 @@
+@@ -1,5 +1,6 @@
+ package net.minecraft.block;
+ 
++import java.util.List;
+ import java.util.Random;
+ import net.minecraft.block.properties.IProperty;
+ import net.minecraft.block.properties.PropertyEnum;
+@@ -24,12 +25,14 @@
+ import net.minecraft.world.gen.feature.WorldGenTaiga2;
+ import net.minecraft.world.gen.feature.WorldGenTrees;
+ import net.minecraft.world.gen.feature.WorldGenerator;
++import net.minecraftforge.common.util.BlockSnapshot;
+ 
+ public class BlockSapling extends BlockBush implements IGrowable
+ {
      public static final PropertyEnum<BlockPlanks.EnumType> TYPE = PropertyEnum.<BlockPlanks.EnumType>create("type", BlockPlanks.EnumType.class);
      public static final PropertyInteger STAGE = PropertyInteger.create("stage", 0, 1);
      protected static final AxisAlignedBB SAPLING_AABB = new AxisAlignedBB(0.09999999403953552D, 0.0D, 0.09999999403953552D, 0.8999999761581421D, 0.800000011920929D, 0.8999999761581421D);
@@ -8,36 +22,44 @@
  
      protected BlockSapling()
      {
-@@ -56,7 +57,28 @@
+@@ -56,7 +59,36 @@
              if (!worldIn.isAreaLoaded(pos, 1)) return; // Forge: prevent loading unloaded chunks when checking neighbor's light
              if (worldIn.getLightFromNeighbors(pos.up()) >= 9 && rand.nextInt(7) == 0)
              {
 +                worldIn.captureTreeGeneration = true; //Craftbukkit
                  this.grow(worldIn, pos, state, rand);
-+                //Craftbukkit start - event TODO investigate and use forge capturing
++                //Craftbukkit start - event TODO investigate if it works
 +                worldIn.captureTreeGeneration = false;
-+                if (worldIn.capturedBlockStates.size() > 0) {
++                if (worldIn.capturedBlockSnapshots.size() > 0) {
 +                    org.bukkit.TreeType treeType = BlockSapling.treeType;
 +                    BlockSapling.treeType = null;
 +                    org.bukkit.Location location = new org.bukkit.Location(worldIn.getWorld(), pos.getX(), pos.getY(), pos.getZ());
-+                    java.util.List<org.bukkit.block.BlockState> blocks = (java.util.List<org.bukkit.block.BlockState>) worldIn.capturedBlockStates.clone();
-+                    worldIn.capturedBlockStates.clear();
++                    java.util.List<org.bukkit.block.BlockState> blocks = new java.util.ArrayList<org.bukkit.block.BlockState>();
++                    java.util.List<net.minecraftforge.common.util.BlockSnapshot> snapshots = (List<BlockSnapshot>) worldIn.capturedBlockSnapshots.clone();
++                    
++                    for (net.minecraftforge.common.util.BlockSnapshot snapshot : snapshots)
++                        blocks.add(new org.bukkit.craftbukkit.block.CraftBlockState(snapshot));
++                    
++                    worldIn.capturedBlockSnapshots.clear();
 +                    org.bukkit.event.world.StructureGrowEvent event = null;
 +                    if (treeType != null) {
 +                        event = new org.bukkit.event.world.StructureGrowEvent(location, treeType, false, null, blocks);
 +                        org.bukkit.Bukkit.getPluginManager().callEvent(event);
 +                    }
-+                    if (event == null || !event.isCancelled()) {
-+                        for (org.bukkit.block.BlockState blockstate : blocks) {
-+                            blockstate.update(true);
++                    if (event == null || !event.isCancelled())
++                        // revert back all captured blocks, taken from ForgeHooks
++                        for (net.minecraftforge.common.util.BlockSnapshot blocksnapshot : com.google.common.collect.Lists.reverse(snapshots))
++                        {
++                            worldIn.restoringBlockSnapshots = true;
++                            blocksnapshot.restore(true, false);
++                            worldIn.restoringBlockSnapshots = false;
 +                        }
-+                    }
 +                }
 +                //Craftbukkit end
              }
          }
      }
-@@ -76,7 +98,18 @@
+@@ -76,7 +108,18 @@
      public void generateTree(World worldIn, BlockPos pos, IBlockState state, Random rand)
      {
          if (!net.minecraftforge.event.terraingen.TerrainGen.saplingGrowTree(worldIn, rand, pos)) return;
@@ -56,7 +78,7 @@
          int i = 0;
          int j = 0;
          boolean flag = false;
-@@ -92,6 +125,7 @@
+@@ -92,6 +135,7 @@
                      {
                          if (this.isTwoByTwoOfType(worldIn, pos, i, j, BlockPlanks.EnumType.SPRUCE))
                          {
@@ -64,7 +86,7 @@
                              worldgenerator = new WorldGenMegaPineTree(false, rand.nextBoolean());
                              flag = true;
                              break label68;
-@@ -103,11 +137,13 @@
+@@ -103,11 +147,13 @@
                  {
                      i = 0;
                      j = 0;
@@ -78,7 +100,7 @@
                  worldgenerator = new WorldGenBirchTree(true, false);
                  break;
              case JUNGLE:
-@@ -121,6 +157,7 @@
+@@ -121,6 +167,7 @@
                      {
                          if (this.isTwoByTwoOfType(worldIn, pos, i, j, BlockPlanks.EnumType.JUNGLE))
                          {
@@ -86,7 +108,7 @@
                              worldgenerator = new WorldGenMegaJungle(true, 10, 20, iblockstate, iblockstate1);
                              flag = true;
                              break label82;
-@@ -132,11 +169,13 @@
+@@ -132,11 +179,13 @@
                  {
                      i = 0;
                      j = 0;
@@ -100,7 +122,7 @@
                  worldgenerator = new WorldGenSavannaTree(true);
                  break;
              case DARK_OAK:
-@@ -148,6 +187,7 @@
+@@ -148,6 +197,7 @@
                      {
                          if (this.isTwoByTwoOfType(worldIn, pos, i, j, BlockPlanks.EnumType.DARK_OAK))
                          {
